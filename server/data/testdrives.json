@@ -1,0 +1,28 @@
+[
+  {
+    "id": "td-1",
+    "customerName": "Ananya Verma",
+    "customerPhone": "+91 98201 54321",
+    "vehicleId": "veh-2",
+    "vehicleName": "Tata Safari Dark Edition",
+    "date": "2026-09-17",
+    "timeSlot": "15:30 - 16:30",
+    "drivingLicense": "DL-MH-142019-0091",
+    "assignedStaff": "Rajesh Sharma",
+    "status": "Scheduled",
+    "notes": "VIP client. 45-min highway and automatic transmission drive."
+  },
+  {
+    "id": "td-2",
+    "customerName": "Rahul Sharma",
+    "customerPhone": "+91 98765 43210",
+    "vehicleId": "veh-1",
+    "vehicleName": "Mahindra XUV700 AX7 Luxury",
+    "date": "2026-09-18",
+    "timeSlot": "11:30 - 12:30",
+    "drivingLicense": "DL-MH-122020-0045",
+    "assignedStaff": "Priya Patel",
+    "status": "Scheduled",
+    "notes": "Client requested ADAS features and Panoramic Skyroof demonstration."
+  }
+]

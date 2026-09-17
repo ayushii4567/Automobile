@@ -1,0 +1,26 @@
+[
+  {
+    "id": "enq-1",
+    "customerName": "Rahul Sharma",
+    "phone": "+91 98765 43210",
+    "email": "rahul.sharma@apexcapital.in",
+    "vehicleInterest": "Mahindra XUV700 AX7 Luxury",
+    "source": "Walk-in",
+    "status": "Follow-up",
+    "notes": "Follow-up scheduled today on vehicle enquiry & on-road quotation.",
+    "followUpDate": "2026-09-17",
+    "createdAt": "2026-09-15"
+  },
+  {
+    "id": "enq-2",
+    "customerName": "Priya Mehta",
+    "phone": "+91 87654 32109",
+    "email": "priya.mehta@lumina.in",
+    "vehicleInterest": "Tata Safari Dark Edition",
+    "source": "Showroom VIP",
+    "status": "New",
+    "notes": "Interested in automatic diesel variant and exchange offer.",
+    "followUpDate": "2026-09-19",
+    "createdAt": "2026-09-16"
+  }
+]

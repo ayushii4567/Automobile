@@ -1,0 +1,26 @@
+[
+  {
+    "id": "stf-1",
+    "name": "Rajesh Sharma",
+    "role": "Senior Sales Consultant",
+    "department": "Showroom Sales & Advisory",
+    "email": "rajesh.sharma@autocore.in",
+    "phone": "+91 98765 11001",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+    "salesClosed": 4,
+    "revenueGenerated": 4800000
+  },
+  {
+    "id": "stf-2",
+    "name": "Priya Patel",
+    "role": "Customer Relationship Manager",
+    "department": "VIP Relations & Delivery",
+    "email": "priya.patel@autocore.in",
+    "phone": "+91 98765 11002",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+    "salesClosed": 3,
+    "revenueGenerated": 3600000
+  }
+]

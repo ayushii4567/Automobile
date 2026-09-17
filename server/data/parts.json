@@ -1,0 +1,30 @@
+[
+  {
+    "id": "part-101",
+    "partNo": "AC-BRK-SUV",
+    "name": "OEM Front Brake Pad Set",
+    "category": "Braking",
+    "compatibleModel": "Mahindra XUV700 / Scorpio-N",
+    "stock": 12,
+    "minStock": 4,
+    "unitCost": 1800,
+    "sellingPrice": 2800,
+    "supplier": "Bosch Automotive India",
+    "location": "Shelf A-12",
+    "status": "In Stock"
+  },
+  {
+    "id": "part-102",
+    "partNo": "AC-FLT-OIL",
+    "name": "Synthetic High-Flow Engine Oil Filter",
+    "category": "Maintenance",
+    "compatibleModel": "Tata Safari / Harrier 2.0L",
+    "stock": 2,
+    "minStock": 5,
+    "unitCost": 350,
+    "sellingPrice": 650,
+    "supplier": "Mobil 1 Performance India",
+    "location": "Shelf B-03",
+    "status": "Low Stock"
+  }
+]

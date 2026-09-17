@@ -1,0 +1,17 @@
+{
+  "showroomName": "AutoCore Motors Showroom",
+  "tagline": "Authorized Premium Automobile Dealership",
+  "dealerLicense": "DL-MH-02-SHOWROOM-2024",
+  "currency": "₹",
+  "currencyCode": "INR",
+  "defaultTaxRate": 10,
+  "email": "contact@autocoreshowroom.com",
+  "phone": "+91 98765 43210",
+  "address": "Showroom 12, Automobile Hub, Andheri East, Mumbai, MH 400069",
+  "operatingHours": "Mon - Sat: 9:30 AM - 7:30 PM | Sun: 10:00 AM - 4:00 PM",
+  "socials": {
+    "instagram": "@autocoreshowroom",
+    "youtube": "AutoCoreMotors",
+    "twitter": "@AutoCoreMotors"
+  }
+}

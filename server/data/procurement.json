@@ -1,0 +1,36 @@
+[
+  {
+    "id": "po-201",
+    "poNumber": "PO-2026-081",
+    "supplier": "Mahindra & Mahindra Chakan Plant",
+    "brand": "Mahindra",
+    "model": "XUV700 AX7 Luxury",
+    "year": 2026,
+    "vin": "MA1TB2A99PS189421",
+    "exteriorColor": "Dazzling Silver",
+    "category": "SUV",
+    "orderDate": "2026-08-20",
+    "expectedDelivery": "2026-09-28",
+    "purchaseCost": 1850000,
+    "suggestedRetailPrice": 2150000,
+    "status": "In Transit",
+    "notes": "Factory dispatched via covered car carrier trailer."
+  },
+  {
+    "id": "po-202",
+    "poNumber": "PO-2026-082",
+    "supplier": "Tata Motors Pune Plant",
+    "brand": "Tata",
+    "model": "Safari Dark Edition",
+    "year": 2026,
+    "vin": "MAT94NHA9P0293811",
+    "exteriorColor": "Oberon Black",
+    "category": "SUV",
+    "orderDate": "2026-09-02",
+    "expectedDelivery": "2026-10-10",
+    "purchaseCost": 1700000,
+    "suggestedRetailPrice": 1980000,
+    "status": "Ordered",
+    "notes": "Allocated under dealer monthly factory order quota."
+  }
+]

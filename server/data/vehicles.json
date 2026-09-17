@@ -1,0 +1,40 @@
+[
+  {
+    "id": "veh-1",
+    "brand": "Mahindra",
+    "model": "XUV700 AX7 Luxury",
+    "year": 2024,
+    "category": "SUV",
+    "color": "Midnight Black",
+    "fuel": "Diesel",
+    "transmission": "6-Speed Automatic",
+    "engine": "2.2L mHawk Turbo Diesel",
+    "horsepower": 182,
+    "mileage": 120,
+    "price": 2150000,
+    "vin": "MA1TA2BK5P829104",
+    "stock": 2,
+    "status": "Available",
+    "image": "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1200&q=80",
+    "features": ["ADAS Level 2", "Panoramic Skyroof", "Dual HD Screens", "Sony 3D Sound System"]
+  },
+  {
+    "id": "veh-2",
+    "brand": "Tata",
+    "model": "Safari Dark Edition",
+    "year": 2024,
+    "category": "SUV",
+    "color": "Oberon Black",
+    "fuel": "Diesel",
+    "transmission": "6-Speed Automatic",
+    "engine": "2.0L Kryotec Turbocharged",
+    "horsepower": 168,
+    "mileage": 85,
+    "price": 1980000,
+    "vin": "MAT621980P349012",
+    "stock": 1,
+    "status": "Available",
+    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+    "features": ["Ventilated Seats", "360 Surround Camera", "JBL Audio System", "Electronic Parking Brake"]
+  }
+]

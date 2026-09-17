@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cust-1",
+    "name": "Rahul Sharma",
+    "email": "rahul.sharma@apexcapital.in",
+    "phone": "+91 98765 43210",
+    "city": "Mumbai, MH",
+    "status": "VIP",
+    "interestedVehicle": "Mahindra XUV700 AX7 Luxury",
+    "budget": 2500000,
+    "lastContact": "2026-09-17",
+    "notes": "Interested in Midnight Black color and extended warranty package."
+  },
+  {
+    "id": "cust-2",
+    "name": "Ananya Verma",
+    "email": "ananya.verma@techsolutions.in",
+    "phone": "+91 98201 54321",
+    "city": "Pune, MH",
+    "status": "Active Buyer",
+    "interestedVehicle": "Tata Safari Dark Edition",
+    "budget": 2300000,
+    "lastContact": "2026-09-16",
+    "notes": "VIP client. Scheduled test drive for today 3:30 PM."
+  }
+]

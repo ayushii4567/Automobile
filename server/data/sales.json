@@ -1,0 +1,40 @@
+[
+  {
+    "id": "sale-101",
+    "invoiceNo": "INV-2026-0881",
+    "customerId": "cust-2",
+    "customerName": "Ananya Verma",
+    "vehicleId": "veh-2",
+    "vehicleName": "Tata Safari Dark Edition (2024)",
+    "vin": "MAT621980P349012",
+    "basePrice": 1980000,
+    "discount": 20000,
+    "taxRate": 10,
+    "taxAmount": 196000,
+    "totalAmount": 2156000,
+    "paymentMethod": "Net Banking / RTGS",
+    "salesAgent": "Rajesh Sharma",
+    "saleDate": "2026-09-14",
+    "deliveryDate": "2026-09-18",
+    "status": "Delivered"
+  },
+  {
+    "id": "sale-102",
+    "invoiceNo": "INV-2026-0882",
+    "customerId": "cust-1",
+    "customerName": "Rahul Sharma",
+    "vehicleId": "veh-1",
+    "vehicleName": "Mahindra XUV700 AX7 Luxury (2024)",
+    "vin": "MA1TA2BK5P829104",
+    "basePrice": 2150000,
+    "discount": 25000,
+    "taxRate": 10,
+    "taxAmount": 212500,
+    "totalAmount": 2337500,
+    "paymentMethod": "Car Loan / HDFC Bank",
+    "salesAgent": "Priya Patel",
+    "saleDate": "2026-09-17",
+    "deliveryDate": "2026-09-21",
+    "status": "Processing"
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "srv-201",
+    "ticketNo": "SRV-9021",
+    "customerName": "Rahul Sharma",
+    "vehicleModel": "Mahindra XUV700 AX7 Luxury",
+    "vin": "MA1TA2BK5P829104",
+    "serviceType": "10,000 km Scheduled Service & Polish",
+    "technician": "Ramesh Pawar (Master Tech)",
+    "date": "2026-09-17",
+    "status": "In Progress",
+    "estimatedCost": 3500,
+    "notes": "Synthetic Mobil 1 oil change, multi-point inspection, brake pad thickness check."
+  },
+  {
+    "id": "srv-202",
+    "ticketNo": "SRV-9022",
+    "customerName": "Ananya Verma",
+    "vehicleModel": "Tata Safari Dark Edition",
+    "vin": "MAT621980P349012",
+    "serviceType": "Pre-Delivery Inspection (PDI) & Detailing",
+    "technician": "Ramesh Pawar (Master Tech)",
+    "date": "2026-09-16",
+    "status": "Completed",
+    "estimatedCost": 1800,
+    "notes": "Full 25-point PDI inspection cleared, tire pressure calibrated."
+  }
+]

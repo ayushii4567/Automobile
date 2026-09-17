@@ -1,0 +1,21 @@
+{
+  "name": "automobile-showroom-management",
+  "version": "1.0.0",
+  "description": "Apex Horizon Motors - Ultra-Modern Automobile Showroom & Dealership Management System",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [
+    "automobile",
+    "showroom",
+    "dealership-management",
+    "react",
+    "vite",
+    "express"
+  ],
+  "author": "Apex Horizon Motors",
+  "license": "MIT"
+}

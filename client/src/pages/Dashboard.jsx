@@ -386,7 +386,7 @@ export default function Dashboard({
 
       {/* Card 3: RECENT SALES / TRANSACTIONS (Full Width Table) */}
       <div className="glass-card hover-elevate" style={{ padding: '22px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               DEAL FLOW &amp; CONTRACTS
@@ -475,7 +475,7 @@ export default function Dashboard({
 
       {/* Card 4: ⚡ SHOWROOM ACTIVITY & FOLLOW-UP TIMELINE (Realistic Client Demo Feature) */}
       <div className="glass-card hover-elevate" style={{ padding: '22px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               LIVE OPERATIONS FEED

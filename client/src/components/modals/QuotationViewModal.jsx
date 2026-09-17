@@ -36,7 +36,9 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
           alignItems: 'flex-start',
           borderBottom: '2px solid #ef4444',
           paddingBottom: '16px',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          flexWrap: 'wrap',
+          gap: '12px'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -131,93 +133,95 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
         </div>
 
         {/* Itemized Pricing Table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #cbd5e1', textAlign: 'left', background: '#f1f5f9' }}>
-              <th style={{ padding: '8px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>Item Description</th>
-              <th style={{ padding: '8px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#334155', textAlign: 'right' }}>Amount (₹ INR)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-              <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                <strong>Base Ex-Showroom Price</strong>
-                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Manufacturer standard vehicle specification</div>
-              </td>
-              <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600 }}>
-                ₹{Number(quotation.exShowroomPrice || 0).toLocaleString('en-IN')}
-              </td>
-            </tr>
-
-            {Number(quotation.rtoTax) > 0 && (
+        <div className="data-table-wrapper" style={{ marginBottom: '20px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #cbd5e1', textAlign: 'left', background: '#f1f5f9' }}>
+                <th style={{ padding: '8px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>Item Description</th>
+                <th style={{ padding: '8px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#334155', textAlign: 'right' }}>Amount (₹ INR)</th>
+              </tr>
+            </thead>
+            <tbody>
               <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
                 <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                  <strong>RTO & Road Tax</strong>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>State vehicle registration and licensing duties</div>
-                </td>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
-                  ₹{Number(quotation.rtoTax).toLocaleString('en-IN')}
-                </td>
-              </tr>
-            )}
-
-            {Number(quotation.insurance) > 0 && (
-              <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                  <strong>Comprehensive Bumper-to-Bumper Insurance</strong>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Zero depreciation coverage for 1 year</div>
-                </td>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
-                  ₹{Number(quotation.insurance).toLocaleString('en-IN')}
-                </td>
-              </tr>
-            )}
-
-            {Number(quotation.warrantyPack) > 0 && (
-              <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                  <strong>Extended Factory Warranty Pack</strong>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>5 Years / Unlimited track and road coverage</div>
-                </td>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
-                  ₹{Number(quotation.warrantyPack).toLocaleString('en-IN')}
-                </td>
-              </tr>
-            )}
-
-            {Number(quotation.accessories) > 0 && (
-              <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                  <strong>Showroom Accessories & Detailing Pack</strong>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Ceramic coating, premium floor mats, trickle charger</div>
-                </td>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
-                  ₹{Number(quotation.accessories).toLocaleString('en-IN')}
-                </td>
-              </tr>
-            )}
-
-            {Number(quotation.discount) > 0 && (
-              <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#dc2626' }}>
-                <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
-                  <strong>Special Showroom Privilege Discount</strong>
+                  <strong>Base Ex-Showroom Price</strong>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Manufacturer standard vehicle specification</div>
                 </td>
                 <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600 }}>
-                  -₹{Number(quotation.discount).toLocaleString('en-IN')}
+                  ₹{Number(quotation.exShowroomPrice || 0).toLocaleString('en-IN')}
                 </td>
               </tr>
-            )}
 
-            <tr style={{ background: '#f8fafc', borderTop: '2px solid #0f172a' }}>
-              <td style={{ padding: '12px', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                Total Estimated On-Road Price
-              </td>
-              <td style={{ padding: '12px', fontSize: '1.2rem', fontWeight: 800, textAlign: 'right', color: '#15803d' }}>
-                ₹{Number(quotation.totalAmount || 0).toLocaleString('en-IN')}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              {Number(quotation.rtoTax) > 0 && (
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
+                    <strong>RTO & Road Tax</strong>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>State vehicle registration and licensing duties</div>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
+                    ₹{Number(quotation.rtoTax).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+
+              {Number(quotation.insurance) > 0 && (
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
+                    <strong>Comprehensive Bumper-to-Bumper Insurance</strong>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Zero depreciation coverage for 1 year</div>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
+                    ₹{Number(quotation.insurance).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+
+              {Number(quotation.warrantyPack) > 0 && (
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
+                    <strong>Extended Factory Warranty Pack</strong>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>5 Years / Unlimited track and road coverage</div>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
+                    ₹{Number(quotation.warrantyPack).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+
+              {Number(quotation.accessories) > 0 && (
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
+                    <strong>Showroom Accessories & Detailing Pack</strong>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Ceramic coating, premium floor mats, trickle charger</div>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right' }}>
+                    ₹{Number(quotation.accessories).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+
+              {Number(quotation.discount) > 0 && (
+                <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#dc2626' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>
+                    <strong>Special Showroom Privilege Discount</strong>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', textAlign: 'right', fontWeight: 600 }}>
+                    -₹{Number(quotation.discount).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              )}
+
+              <tr style={{ background: '#f8fafc', borderTop: '2px solid #0f172a' }}>
+                <td style={{ padding: '12px', fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
+                  Total Estimated On-Road Price
+                </td>
+                <td style={{ padding: '12px', fontSize: '1.2rem', fontWeight: 800, textAlign: 'right', color: '#15803d' }}>
+                  ₹{Number(quotation.totalAmount || 0).toLocaleString('en-IN')}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         {quotation.notes && (
           <div style={{
@@ -256,6 +260,8 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '10px',
         marginTop: '16px'
       }} className="no-print">
         {onConvertToSale && (

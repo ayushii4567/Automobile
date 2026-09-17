@@ -71,11 +71,7 @@ export default function Inventory({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Top Inventory Summary Strip */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '14px'
-      }}>
+      <div className="responsive-kpi-grid">
         <div className="glass-card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb' }}>
             <Car size={18} />
@@ -240,11 +236,7 @@ export default function Inventory({
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-          gap: '20px'
-        }}>
+        <div className="responsive-card-grid">
           {filteredVehicles.map(vehicle => (
             <div 
               key={vehicle.id} 

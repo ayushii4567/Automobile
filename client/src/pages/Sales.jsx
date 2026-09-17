@@ -83,12 +83,12 @@ export default function Sales({
           flexWrap: 'wrap',
           gap: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-            <div style={{ position: 'relative', width: '250px' }}>
-              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+            <div style={{ position: 'relative', flex: '1 1 160px', minWidth: '140px' }}>
+              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               <input
                 type="text"
-                placeholder="Search invoice, customer, car..."
+                placeholder="Search invoice, customer..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="form-input"
@@ -100,7 +100,7 @@ export default function Sales({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="form-select"
-              style={{ width: '140px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '0 1 140px', minWidth: '120px', height: '36px', fontSize: '0.85rem' }}
             >
               <option value="All">All Invoices</option>
               <option value="Confirmed">Confirmed</option>
@@ -109,7 +109,7 @@ export default function Sales({
             </select>
           </div>
 
-          <button onClick={onAddSale} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem' }}>
+          <button onClick={onAddSale} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem', flexShrink: 0 }}>
             <Plus size={15} />
             <span>Record New Sale</span>
           </button>

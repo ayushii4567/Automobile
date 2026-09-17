@@ -62,13 +62,13 @@ export default function Enquiries({ enquiries = [], onAddEnquiry, onEditEnquiry,
 
       {/* Filter + Search */}
       <div className="glass-card" style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-          <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
-          <input className="form-input" placeholder="Search by name, vehicle, phone..."
+        <div style={{ position: 'relative', flex: '1 1 160px', minWidth: '140px' }}>
+          <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+          <input className="form-input" placeholder="Search name, vehicle, phone..."
             value={localSearch} onChange={e => setLocalSearch(e.target.value)}
             style={{ paddingLeft: '32px', height: '36px' }} />
         </div>
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div className="filter-chip-row">
           {['All', 'New', 'Follow-up', 'Converted', 'Cold'].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
               style={{
@@ -76,6 +76,8 @@ export default function Enquiries({ enquiries = [], onAddEnquiry, onEditEnquiry,
                 background: statusFilter === s ? '#ef4444' : '#f8fafc',
                 color: statusFilter === s ? '#fff' : '#475569',
                 borderColor: statusFilter === s ? '#ef4444' : '#e5e7eb',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}>{s} {s !== 'All' && <span>({counts[s]})</span>}
             </button>
           ))}

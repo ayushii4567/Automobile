@@ -74,11 +74,7 @@ export default function Reports({ dashboardData, sales = [] }) {
       </div>
 
       {/* KPI Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '14px'
-      }}>
+      <div className="responsive-kpi-grid">
         <div className="glass-card" style={{ padding: '16px 20px' }}>
           <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
             Gross Sales (YTD)

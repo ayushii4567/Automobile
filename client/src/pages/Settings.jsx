@@ -133,17 +133,17 @@ export default function Settings({ settings = {}, onSaveSettings }) {
                 required
               />
             </div>
+          </div>
 
-            <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label className="form-label">Physical Address</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                required
-              />
-            </div>
+          <div className="form-group" style={{ marginTop: '14px' }}>
+            <label className="form-label">Physical Address</label>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              required
+            />
           </div>
         </div>
 

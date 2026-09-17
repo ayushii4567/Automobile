@@ -40,8 +40,8 @@ export default function Staff({
           flexWrap: 'wrap',
           gap: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-            <div style={{ position: 'relative', width: '250px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+            <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '150px' }}>
               <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
@@ -57,7 +57,7 @@ export default function Staff({
               value={deptFilter}
               onChange={(e) => setDeptFilter(e.target.value)}
               className="form-select"
-              style={{ width: '180px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '1 1 150px', minWidth: '130px', height: '36px', fontSize: '0.85rem' }}
             >
               {departments.map(d => (
                 <option key={d} value={d}>{d === 'All' ? 'All Departments' : d}</option>
@@ -65,7 +65,7 @@ export default function Staff({
             </select>
           </div>
 
-          <button onClick={onAddStaff} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem' }}>
+          <button onClick={onAddStaff} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem', flexShrink: 0 }}>
             <Plus size={15} />
             <span>Add Staff Member</span>
           </button>
@@ -73,11 +73,7 @@ export default function Staff({
       </div>
 
       {/* Staff Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
-        gap: '20px'
-      }}>
+      <div className="responsive-card-grid">
         {filtered.map((member) => (
           <div 
             key={member.id}

@@ -37,7 +37,9 @@ export default function InvoiceModal({ isOpen, onClose, sale, settings = {} }) {
           alignItems: 'flex-start',
           borderBottom: '2px solid #e2e8f0',
           paddingBottom: '20px',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          flexWrap: 'wrap',
+          gap: '12px'
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -128,33 +130,35 @@ export default function InvoiceModal({ isOpen, onClose, sale, settings = {} }) {
           <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
             Vehicle Details
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', color: '#475569', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
-                <th style={{ padding: '8px 12px' }}>Description / Model</th>
-                <th style={{ padding: '8px 12px' }}>VIN</th>
-                <th style={{ padding: '8px 12px', textAlign: 'right' }}>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={{ padding: '12px', fontWeight: 600, color: '#0f172a' }}>
-                  {sale.vehicleName}
-                </td>
-                <td style={{ padding: '12px', color: '#64748b', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                  {sale.vin || 'N/A'}
-                </td>
-                <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
-                  ₹{Number(sale.basePrice || 0).toLocaleString('en-IN')}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="data-table-wrapper">
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ background: '#f8fafc', color: '#475569', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '8px 12px' }}>Description / Model</th>
+                  <th style={{ padding: '8px 12px' }}>VIN</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right' }}>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '12px', fontWeight: 600, color: '#0f172a' }}>
+                    {sale.vehicleName}
+                  </td>
+                  <td style={{ padding: '12px', color: '#64748b', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                    {sale.vin || 'N/A'}
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
+                    ₹{Number(sale.basePrice || 0).toLocaleString('en-IN')}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Calculation */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '28px' }}>
-          <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ width: '100%', maxWidth: '280px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
               <span>Base Price:</span>
               <span style={{ color: '#0f172a', fontWeight: 500 }}>₹{Number(sale.basePrice || 0).toLocaleString('en-IN')}</span>

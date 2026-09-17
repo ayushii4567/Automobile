@@ -137,8 +137,8 @@ export default function Quotations({
           marginBottom: '16px'
         }}>
           {/* Search Input */}
-          <div style={{ position: 'relative', width: '280px' }}>
-            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '150px' }}>
+            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input 
               type="text"
               placeholder="Search quotation, client, vehicle..."
@@ -150,7 +150,7 @@ export default function Quotations({
           </div>
 
           {/* Status Filter Buttons */}
-          <div style={{ display: 'flex', gap: '6px', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <div className="filter-chip-row" style={{ background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0', flexShrink: 0 }}>
             {['All', 'Draft', 'Sent', 'Accepted', 'Expired'].map(st => (
               <button
                 key={st}

@@ -89,9 +89,9 @@ export default function Service({
           flexWrap: 'wrap',
           gap: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
-            <div style={{ position: 'relative', width: '250px' }}>
-              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+            <div style={{ position: 'relative', flex: '1 1 160px', minWidth: '140px' }}>
+              <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               <input
                 type="text"
                 placeholder="Search ticket, customer, car..."
@@ -106,7 +106,7 @@ export default function Service({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="form-select"
-              style={{ width: '150px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '0 1 150px', minWidth: '120px', height: '36px', fontSize: '0.85rem' }}
             >
               <option value="All">All Statuses</option>
               <option value="In Progress">In Progress</option>
@@ -115,7 +115,7 @@ export default function Service({
             </select>
           </div>
 
-          <button onClick={onAddService} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem' }}>
+          <button onClick={onAddService} className="btn btn-primary" style={{ height: '36px', fontSize: '0.85rem', flexShrink: 0 }}>
             <Plus size={15} />
             <span>Open Service Ticket</span>
           </button>

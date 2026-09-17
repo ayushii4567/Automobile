@@ -40,12 +40,7 @@ export default function StatCard({
           }}>
             {title}
           </div>
-          <div style={{
-            fontSize: '1.75rem',
-            fontWeight: 700,
-            color: '#0f172a',
-            marginTop: '6px'
-          }}>
+          <div className="stat-card-value">
             {value}
           </div>
         </div>

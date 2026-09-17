@@ -154,11 +154,11 @@ export default function Parts({
           marginBottom: '16px'
         }}>
           {/* Search */}
-          <div style={{ position: 'relative', width: '280px' }}>
-            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '150px' }}>
+            <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
             <input 
               type="text"
-              placeholder="Search by part #, name, car model..."
+              placeholder="Search part #, name, car model..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="form-input"
@@ -167,7 +167,7 @@ export default function Parts({
           </div>
 
           {/* Category Filter */}
-          <div style={{ display: 'flex', gap: '4px', background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0', overflowX: 'auto' }}>
+          <div className="filter-chip-row" style={{ background: '#f8fafc', padding: '4px', borderRadius: '8px', border: '1px solid #e2e8f0', flexShrink: 0 }}>
             {categories.map(cat => (
               <button
                 key={cat}
@@ -180,6 +180,7 @@ export default function Parts({
                   fontWeight: 600,
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
+                  flexShrink: 0,
                   background: categoryFilter === cat ? '#ef4444' : 'transparent',
                   color: categoryFilter === cat ? '#ffffff' : '#64748b',
                   transition: 'all 0.15s ease'

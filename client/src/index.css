@@ -126,6 +126,8 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.2;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge-available {
@@ -243,6 +245,7 @@ h1, h2, h3, h4, h5, h6 {
   transition: all 0.15s ease;
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-primary {
@@ -291,6 +294,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 /* Forms & Inputs */
@@ -317,6 +321,8 @@ h1, h2, h3, h4, h5, h6 {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   outline: none;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -332,9 +338,12 @@ h1, h2, h3, h4, h5, h6 {
 /* Clean Data Table */
 .data-table-wrapper {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   background: #ffffff;
+  max-width: 100%;
+  position: relative;
 }
 
 .data-table {
@@ -342,6 +351,7 @@ h1, h2, h3, h4, h5, h6 {
   border-collapse: collapse;
   text-align: left;
   font-size: 0.875rem;
+  min-width: 480px;
 }
 
 .data-table th {
@@ -353,6 +363,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.04em;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 
 .data-table td {
@@ -523,6 +534,60 @@ h1, h2, h3, h4, h5, h6 {
   animation: shimmerGlow 4s linear infinite;
 }
 
+/* ======================== STAT CARD VALUE ======================== */
+.stat-card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 6px;
+  word-break: break-word;
+}
+
+/* ======================== FILTER CHIP ROW ======================== */
+.filter-chip-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  padding-bottom: 2px;
+}
+.filter-chip-row::-webkit-scrollbar { display: none; }
+
+/* ======================== CONTROL BAR ======================== */
+.control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.control-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+.search-input-wrap {
+  position: relative;
+  flex: 1 1 180px;
+  min-width: 140px;
+  max-width: 280px;
+}
+
+/* ======================== TOAST ======================== */
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  right: 32px;
+  z-index: 2000;
+  max-width: calc(100vw - 40px);
+  pointer-events: none;
+}
+
 /* ================= MOBILE RESPONSIVE SYSTEM ================= */
 
 /* Backdrop Overlay for Mobile Drawer */
@@ -586,9 +651,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .responsive-finance-grid {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1.3fr;
   gap: 20px;
   align-items: start;
+}
+
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .responsive-kpi-grid {
@@ -711,6 +782,15 @@ h1, h2, h3, h4, h5, h6 {
     gap: 10px !important;
   }
 
+  .responsive-card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .printable-invoice {
+    padding: 14px 12px !important;
+  }
+
   /* Modals on mobile devices — bottom sheet style */
   .modal-overlay {
     padding: 0;
@@ -797,20 +877,64 @@ h1, h2, h3, h4, h5, h6 {
   .main-content-layout {
     padding: 10px !important;
   }
+
+  .stat-card-value {
+    font-size: 1.3rem !important;
+  }
+
+  .btn {
+    font-size: 0.79rem;
+    gap: 5px;
+  }
 }
 
 /* ======= CRITICAL: Override inline maxWidth on modals for mobile ======= */
-/* Inline styles have higher specificity, so we use :where() or force via attribute */
 @media (max-width: 640px) {
-  /* Modal full-width override — beats inline style via attribute selector trick */
   .modal-content[style] {
     max-width: 100% !important;
     width: 100% !important;
-    border-radius: 16px 16px 0 0 !important;
+    border-radius: 20px 20px 0 0 !important;
   }
-  
   .modal-overlay {
     padding: 0 !important;
     align-items: flex-end !important;
+  }
+
+  /* iOS: prevent zoom on input focus */
+  .form-input, .form-select, .form-textarea {
+    font-size: 16px !important;
+  }
+
+  /* search bar full width on phone */
+  .search-input-wrap {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  /* header */
+  .header-container {
+    padding: 0 12px !important;
+  }
+
+  /* tables smaller on phone */
+  .data-table th,
+  .data-table td {
+    padding: 9px 10px;
+    font-size: 0.78rem;
+  }
+
+  /* stack control bar on phone */
+  .control-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .control-bar-left {
+    width: 100%;
+  }
+
+  /* stat card value */
+  .stat-card-value {
+    font-size: 1.45rem;
   }
 }

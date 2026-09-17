@@ -11,7 +11,8 @@ import {
   FileText,
   Receipt,
   ArrowRight,
-  X
+  X,
+  Menu
 } from 'lucide-react';
 
 export default function Header({ 
@@ -27,7 +28,8 @@ export default function Header({
   vehicles = [],
   customers = [],
   quotations = [],
-  sales = []
+  sales = [],
+  onToggleMobileMenu
 }) {
   const [bellOpen, setBellOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -118,7 +120,7 @@ export default function Header({
   };
 
   return (
-    <header style={{
+    <header className="header-container" style={{
       height: '64px',
       padding: '0 28px',
       display: 'flex',
@@ -130,30 +132,55 @@ export default function Header({
       top: 0,
       zIndex: 30
     }}>
-      {/* Title & Subtitle */}
-      <div>
-        <h1 style={{
-          fontSize: '1.2rem',
-          fontWeight: 700,
-          color: '#0f172a',
-          lineHeight: 1.2
-        }}>
-          {current.title}
-        </h1>
-        <p style={{
-          fontSize: '0.78rem',
-          color: '#64748b',
-          marginTop: '2px'
-        }}>
-          {current.sub}
-        </p>
+      {/* Left: Hamburger Menu (Mobile) & Title */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+        <button
+          onClick={onToggleMobileMenu}
+          className="show-on-mobile btn btn-secondary btn-icon"
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '8px',
+            padding: 0,
+            cursor: 'pointer',
+            flexShrink: 0
+          }}
+          title="Toggle Navigation Menu"
+          aria-label="Toggle Navigation Menu"
+        >
+          <Menu size={18} />
+        </button>
+
+        <div style={{ minWidth: 0 }}>
+          <h1 className="header-title-text" style={{
+            fontSize: '1.2rem',
+            fontWeight: 700,
+            color: '#0f172a',
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            {current.title}
+          </h1>
+          <p className="header-sub-text" style={{
+            fontSize: '0.78rem',
+            color: '#64748b',
+            marginTop: '2px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}>
+            {current.sub}
+          </p>
+        </div>
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         
-        {/* Global Search Bar */}
-        <div ref={searchRef} style={{ position: 'relative', width: '250px' }}>
+        {/* Global Search Bar (Fluid & Responsive) */}
+        <div ref={searchRef} style={{ position: 'relative', width: 'clamp(130px, 18vw, 240px)' }}>
           <Search 
             size={15} 
             color="#94a3b8" 
@@ -167,7 +194,7 @@ export default function Header({
           />
           <input
             type="text"
-            placeholder="Search showroom..."
+            placeholder="Search..."
             value={searchQuery || ''}
             onChange={(e) => {
               if (setSearchQuery) setSearchQuery(e.target.value);
@@ -176,8 +203,8 @@ export default function Header({
             onFocus={() => setSearchOpen(true)}
             className="form-input"
             style={{
-              paddingLeft: '34px',
-              paddingRight: searchQuery ? '28px' : '10px',
+              paddingLeft: '32px',
+              paddingRight: searchQuery ? '26px' : '10px',
               height: '36px',
               fontSize: '0.82rem',
               borderRadius: '8px',
@@ -212,8 +239,8 @@ export default function Header({
             <div style={{
               position: 'absolute',
               top: '46px',
-              left: 0,
-              width: '380px',
+              right: 0,
+              width: 'min(380px, calc(100vw - 32px))',
               background: '#ffffff',
               border: '1px solid #e2e8f0',
               borderRadius: '12px',
@@ -403,7 +430,7 @@ export default function Header({
           {bellOpen && (
             <div style={{
               position: 'absolute', top: '46px', right: 0,
-              width: '340px', background: '#fff',
+              width: 'min(340px, calc(100vw - 32px))', background: '#fff',
               border: '1px solid #e5e7eb', borderRadius: '12px',
               boxShadow: '0 12px 32px rgba(0,0,0,0.14)', zIndex: 100, overflow: 'hidden'
             }} className="animate-slide-up">
@@ -470,7 +497,7 @@ export default function Header({
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '4px 10px 4px 6px',
+          padding: '4px 8px 4px 6px',
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '20px'
@@ -489,7 +516,7 @@ export default function Header({
           }}>
             {currentUser?.name ? currentUser.name.charAt(0) : 'U'}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="hide-on-phone" style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.1 }}>
               {currentUser?.name || 'User'}
             </span>

@@ -129,7 +129,7 @@ export default function Inventory({
           {/* Left search & filters */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', flex: 1 }}>
             {/* Search */}
-            <div style={{ position: 'relative', width: '220px' }}>
+            <div style={{ position: 'relative', flex: '1 1 180px', minWidth: '160px' }}>
               <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
@@ -146,7 +146,7 @@ export default function Inventory({
               value={selectedBrand} 
               onChange={(e) => setSelectedBrand(e.target.value)}
               className="form-select"
-              style={{ width: '140px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '1 1 120px', minWidth: '110px', height: '36px', fontSize: '0.85rem' }}
             >
               {brands.map(b => (
                 <option key={b} value={b}>{b === 'All' ? 'All Brands' : b}</option>
@@ -158,7 +158,7 @@ export default function Inventory({
               value={selectedStatus} 
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="form-select"
-              style={{ width: '130px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '1 1 110px', minWidth: '100px', height: '36px', fontSize: '0.85rem' }}
             >
               <option value="All">All Statuses</option>
               <option value="Available">Available</option>
@@ -171,7 +171,7 @@ export default function Inventory({
               value={sortBy} 
               onChange={(e) => setSortBy(e.target.value)}
               className="form-select"
-              style={{ width: '150px', height: '36px', fontSize: '0.85rem' }}
+              style={{ flex: '1 1 140px', minWidth: '120px', height: '36px', fontSize: '0.85rem' }}
             >
               <option value="price-desc">Price: High to Low</option>
               <option value="price-asc">Price: Low to High</option>

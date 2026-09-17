@@ -57,7 +57,7 @@ export default function Settings({ settings = {}, onSaveSettings }) {
             </h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="responsive-grid-equal">
             <div className="form-group">
               <label className="form-label">Showroom Name</label>
               <input
@@ -111,7 +111,7 @@ export default function Settings({ settings = {}, onSaveSettings }) {
             </h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="responsive-grid-equal">
             <div className="form-group">
               <label className="form-label">Email Address</label>
               <input
@@ -156,7 +156,7 @@ export default function Settings({ settings = {}, onSaveSettings }) {
             </h3>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="responsive-grid-equal">
             <div className="form-group">
               <label className="form-label">Currency Symbol</label>
               <input

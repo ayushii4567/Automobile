@@ -40,7 +40,7 @@ export default function Enquiries({ enquiries = [], onAddEnquiry, onEditEnquiry,
       </div>
 
       {/* Stats Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+      <div className="responsive-kpi-grid">
         {[
           { label: 'New Leads', key: 'New', color: '#2563eb', bg: '#eff6ff' },
           { label: 'Follow-up', key: 'Follow-up', color: '#d97706', bg: '#fffbeb' },

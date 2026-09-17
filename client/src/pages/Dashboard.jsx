@@ -122,7 +122,7 @@ export default function Dashboard({
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={onOpenAddSale} className="btn btn-primary" style={{ padding: '8px 16px', fontWeight: 600, fontSize: '0.84rem' }}>
             <Plus size={15} />
             <span>New Sale</span>
@@ -139,11 +139,7 @@ export default function Dashboard({
       </div>
 
       {/* Top 4 KPI Cards (Requested exact 4 items) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-        gap: '16px'
-      }}>
+      <div className="responsive-kpi-grid">
         <StatCard
           title="Inventory"
           value={kpi.totalVehicles || 2}
@@ -202,11 +198,7 @@ export default function Dashboard({
       )}
 
       {/* Middle 2 Cards (Requested Layout: SALES PERFORMANCE vs INVENTORY STATUS) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '20px'
-      }}>
+      <div className="responsive-grid-2">
         
         {/* Card 1: SALES PERFORMANCE (Corporate clean, zero graphs) */}
         <div className="glass-card hover-elevate" style={{ padding: '22px' }}>
@@ -514,7 +506,8 @@ export default function Dashboard({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: '14px',
+                  flexWrap: 'wrap',
+                  gap: '12px',
                   transition: 'transform 0.15s ease, background 0.15s ease'
                 }}
                 onMouseEnter={(e) => {

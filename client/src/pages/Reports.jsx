@@ -129,11 +129,7 @@ export default function Reports({ dashboardData, sales = [] }) {
       </div>
 
       {/* Two Tabular Reports (No Graphs) */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '20px'
-      }}>
+      <div className="responsive-grid-2">
         {/* Monthly Revenue Statement */}
         <div className="glass-card" style={{ padding: '20px' }}>
           <div style={{ marginBottom: '14px' }}>

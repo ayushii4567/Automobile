@@ -78,7 +78,7 @@ export default function Finance() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '20px', alignItems: 'start' }}>
+      <div className="responsive-finance-grid">
         {/* Input Panel */}
         <div className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -157,7 +157,7 @@ export default function Finance() {
           {emi && emi.loanAmount > 0 ? (
             <>
               {/* Summary Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
+              <div className="responsive-grid-equal">
                 {[
                   { label: 'Monthly EMI', value: formatINR(emi.monthly), icon: IndianRupee, color: '#ef4444', bg: '#fee2e2' },
                   { label: 'Loan Amount', value: formatINR(emi.loanAmount), icon: BarChart2, color: '#2563eb', bg: '#eff6ff' },

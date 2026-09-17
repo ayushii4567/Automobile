@@ -1,7 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* AutoDrive — Red Accent Theme */
   --bg-page: #f5f7fa;
@@ -65,12 +66,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
   color: var(--text-main);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* Scrollbar */
@@ -513,4 +516,225 @@ h1, h2, h3, h4, h5, h6 {
   background-size: 200% 100%;
   animation: shimmerGlow 4s linear infinite;
 }
+
+/* ================= MOBILE RESPONSIVE SYSTEM ================= */
+
+/* Backdrop Overlay for Mobile Drawer */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1040;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sidebar Drawer Container */
+.sidebar-container {
+  width: 265px;
+  min-width: 265px;
+  background: #111827;
+  border-right: 1px solid #1f2937;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+/* Touch-friendly Data Table Container */
+.data-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  position: relative;
+}
+
+/* Responsive Grid Utilities */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+.responsive-grid-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.responsive-finance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.responsive-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+/* Visibility Utilities */
+.hide-on-mobile {
+  display: initial;
+}
+.show-on-mobile {
+  display: none !important;
+}
+
+.hide-on-phone {
+  display: initial;
+}
+.show-on-phone {
+  display: none !important;
+}
+
+/* TABLET & MOBILE BREAKPOINT (<= 900px) */
+@media (max-width: 900px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .show-on-mobile {
+    display: flex !important;
+  }
+
+  /* Sidebar becomes off-canvas drawer */
+  .sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 280px;
+    min-width: 280px;
+    z-index: 1050;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .sidebar-container.mobile-open {
+    transform: translateX(0);
+    box-shadow: 12px 0 36px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Main page layout */
+  .main-content-layout {
+    padding: 16px !important;
+  }
+
+  /* Responsive Grids collapse to single column */
+  .responsive-grid-2,
+  .responsive-finance-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .header-container {
+    padding: 0 16px !important;
+  }
+}
+
+/* SMARTPHONE BREAKPOINT (<= 640px) */
+@media (max-width: 640px) {
+  .hide-on-phone {
+    display: none !important;
+  }
+  .show-on-phone {
+    display: flex !important;
+  }
+
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .responsive-grid-equal {
+    grid-template-columns: 1fr !important;
+  }
+  .responsive-grid-equal > * {
+    grid-column: 1 / -1 !important;
+  }
+
+  .responsive-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Modals on mobile devices */
+  .modal-overlay {
+    padding: 10px;
+    align-items: center;
+  }
+
+  .modal-content {
+    width: 96vw !important;
+    max-height: 92vh !important;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-header {
+    padding: 14px 18px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Automatically collapse 2-column or 3-column modal form grids on mobile */
+  .modal-body div[style*="gridTemplateColumns"],
+  .modal-body div[style*="grid-template-columns"],
+  .modal-body div[style*="1fr 1fr"],
+  .modal-body div[style*="1fr 1.5fr"],
+  .modal-body div[style*="repeat(3"],
+  .modal-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .modal-body div[style*="gridColumn"],
+  .modal-body div[style*="grid-column"] {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* Toast notification fits cleanly on small screens */
+  .toast-notification {
+    top: 14px !important;
+    right: 14px !important;
+    left: 14px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Buttons on mobile */
+  .btn-mobile-full {
+    width: 100%;
+  }
+
+  /* Header adjustments */
+  .header-title-text {
+    font-size: 1.05rem !important;
+  }
+  .header-sub-text {
+    display: none !important;
+  }
+}
+
 

@@ -16,7 +16,8 @@ import {
   Truck,
   LogOut,
   ShieldCheck,
-  Award
+  Award,
+  X
 } from 'lucide-react';
 
 export default function Sidebar({ 
@@ -24,7 +25,9 @@ export default function Sidebar({
   setActiveTab, 
   counts = {}, 
   currentUser = { role: 'admin', name: 'Admin' }, 
-  onLogout 
+  onLogout,
+  mobileOpen = false,
+  onCloseMobile
 }) {
   const isAdmin = currentUser?.role === 'admin';
 
@@ -53,66 +56,86 @@ export default function Sidebar({
   const visibleAdmin = isAdmin ? adminMenuItems : [];
 
   return (
-    <aside style={{
-      width: '265px',
-      minWidth: '265px',
-      background: '#111827',
-      borderRight: '1px solid #1f2937',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      position: 'sticky',
-      top: 0,
-      zIndex: 40,
-      userSelect: 'none'
-    }}>
-      {/* Brand Header */}
-      <div style={{
-        padding: '18px 20px',
-        borderBottom: '1px solid #1f2937',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px'
-      }}>
+    <>
+      {/* Mobile Drawer Backdrop Overlay */}
+      <div 
+        className={`sidebar-overlay ${mobileOpen ? 'active' : ''}`}
+        onClick={onCloseMobile}
+        aria-hidden="true"
+      />
+
+      <aside className={`sidebar-container ${mobileOpen ? 'mobile-open' : ''}`}>
+        {/* Brand Header */}
         <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '10px',
-          background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+          padding: '18px 20px',
+          borderBottom: '1px solid #1f2937',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ffffff',
-          boxShadow: '0 4px 12px rgba(239, 68, 68, 0.35)'
+          justifyContent: 'space-between',
+          gap: '12px'
         }}>
-          <Car size={20} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontSize: '1.1rem',
-            fontWeight: 800,
-            color: '#ffffff',
-            letterSpacing: '0.04em',
-            lineHeight: 1.2
-          }}>
-            AUTO<span style={{ color: '#ef4444' }}>CORE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.35)'
+            }}>
+              <Car size={20} />
+            </div>
+            <div>
+              <div style={{
+                fontSize: '1.1rem',
+                fontWeight: 800,
+                color: '#ffffff',
+                letterSpacing: '0.04em',
+                lineHeight: 1.2
+              }}>
+                AUTO<span style={{ color: '#ef4444' }}>CORE</span>
+              </div>
+              <div style={{
+                fontSize: '0.7rem',
+                color: '#94a3b8',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                marginTop: '2px'
+              }}>
+                {isAdmin ? (
+                  <span style={{ color: '#ef4444', fontWeight: 700 }}>👑 Admin Portal</span>
+                ) : (
+                  <span style={{ color: '#38bdf8', fontWeight: 700 }}>🚗 Sales Floor Portal</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div style={{
-            fontSize: '0.7rem',
-            color: '#94a3b8',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            marginTop: '2px'
-          }}>
-            {isAdmin ? (
-              <span style={{ color: '#ef4444', fontWeight: 700 }}>👑 Admin Portal</span>
-            ) : (
-              <span style={{ color: '#38bdf8', fontWeight: 700 }}>🚗 Sales Floor Portal</span>
-            )}
-          </div>
+
+          {/* Close button visible only on mobile/tablet */}
+          <button
+            onClick={onCloseMobile}
+            className="show-on-mobile"
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: 'none',
+              borderRadius: '6px',
+              color: '#9ca3af',
+              width: '32px',
+              height: '32px',
+              cursor: 'pointer',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0
+            }}
+            title="Close Menu"
+          >
+            <X size={18} />
+          </button>
         </div>
-      </div>
 
       {/* Navigation Links */}
       <div style={{
@@ -147,7 +170,10 @@ export default function Sidebar({
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                if (onCloseMobile) onCloseMobile();
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -226,7 +252,10 @@ export default function Sidebar({
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -337,7 +366,10 @@ export default function Sidebar({
 
           {onLogout && (
             <button
-              onClick={onLogout}
+              onClick={() => {
+                if (onLogout) onLogout();
+                if (onCloseMobile) onCloseMobile();
+              }}
               title="Sign Out"
               style={{
                 background: 'rgba(239, 68, 68, 0.12)',
@@ -381,5 +413,6 @@ export default function Sidebar({
         </div>
       </div>
     </aside>
+    </>
   );
 }

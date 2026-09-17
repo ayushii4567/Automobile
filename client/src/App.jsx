@@ -45,6 +45,7 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
 
@@ -580,7 +581,7 @@ export default function App() {
       
       {/* Toast Alert Banner */}
       {toast && (
-        <div style={{
+        <div className="toast-notification" style={{
           position: 'fixed',
           top: '24px',
           right: '32px',
@@ -601,12 +602,17 @@ export default function App() {
         </div>
       )}
 
-      {/* Sidebar with Role Access */}
+      {/* Sidebar with Role Access & Mobile Off-canvas Drawer */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setMobileMenuOpen(false);
+        }}
         currentUser={currentUser}
         onLogout={handleLogout}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
         counts={{
           vehicles: vehicles.length,
           customers: customers.length,
@@ -630,18 +636,22 @@ export default function App() {
           alerts={alerts}
           currentUser={currentUser}
           onLogout={handleLogout}
-          onNavigate={(tab) => setActiveTab(tab)}
+          onNavigate={(tab) => {
+            setActiveTab(tab);
+            setMobileMenuOpen(false);
+          }}
           vehicles={vehicles}
           customers={customers}
           quotations={quotations}
           sales={sales}
+          onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)}
           onQuickAction={() => {
             setPreselectedVehicleForSale(null);
             setIsSaleModalOpen(true);
           }}
         />
 
-        <main style={{ flex: 1, padding: '30px', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
+        <main className="main-content-layout" style={{ flex: 1, padding: 'clamp(14px, 2.5vw, 30px)', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
           {loading ? (
             <div style={{ padding: '80px 20px', textAlign: 'center', color: '#94a3b8' }}>
               <div className="status-dot active" style={{ marginBottom: '14px', width: '12px', height: '12px' }}></div>

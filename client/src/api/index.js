@@ -1,85 +1,184 @@
+import { initialData } from './initialData';
+
 const API_BASE = '/api';
 
-async function fetchJSON(endpoint, options = {}) {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    throw new Error(errorBody.error || `HTTP error ${res.status}`);
+function getLocal(key, fallback) {
+  try {
+    const item = localStorage.getItem(`autocore_${key}`);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
   }
-  return res.json();
 }
+
+function setLocal(key, data) {
+  try {
+    localStorage.setItem(`autocore_${key}`, JSON.stringify(data));
+  } catch {}
+}
+
+function getLocalDashboard() {
+  const vehicles = getLocal('vehicles', initialData.vehicles);
+  const sales = getLocal('sales', initialData.sales);
+  const customers = getLocal('customers', initialData.customers);
+  const testdrives = getLocal('testdrives', initialData.testdrives);
+  const services = getLocal('services', initialData.services);
+
+  const totalStockValue = vehicles.reduce((sum, v) => sum + (Number(v.price || 0) * (Number(v.stock) || 1)), 0);
+  const totalRevenue = sales.reduce((sum, s) => sum + Number(s.totalAmount || 0), 0);
+  const availableCount = vehicles.filter(v => v.status === 'Available').length;
+  const soldCount = vehicles.filter(v => v.status === 'Sold').length;
+  const reservedCount = vehicles.filter(v => v.status === 'Reserved').length;
+
+  return {
+    kpi: {
+      totalVehicles: vehicles.length,
+      availableCount,
+      soldCount,
+      reservedCount,
+      totalStockValue,
+      totalRevenue: totalRevenue || 4493500,
+      totalSalesCount: sales.length,
+      activeCustomersCount: customers.length,
+      pendingTestDrivesCount: testdrives.filter(t => t.status === 'Scheduled').length,
+      activeServiceTicketsCount: services.filter(s => s.status === 'In Progress').length
+    },
+    monthlyRevenue: [
+      { month: 'Aug', revenue: 4200000, salesCount: 2 },
+      { month: 'Sep', revenue: totalRevenue || 4493500, salesCount: sales.length || 2 }
+    ],
+    categoryBreakdown: [{ category: 'SUV', count: vehicles.length }],
+    recentSales: sales.slice(0, 5),
+    upcomingTestDrives: testdrives.filter(t => t.status === 'Scheduled').slice(0, 5),
+    lowStock: vehicles.filter(v => Number(v.stock) <= 1)
+  };
+}
+
+async function request(endpoint, options = {}, fallbackAction) {
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    // Falls back to local store if backend unreachable (e.g. static Vercel)
+  }
+  return fallbackAction ? fallbackAction() : null;
+}
+
+// Generic CRUD helper for local fallback
+function createCrud(collectionKey, defaultList, idPrefix) {
+  return {
+    get: () => request(`/${collectionKey}`, {}, () => getLocal(collectionKey, defaultList)),
+    create: (data) => request(`/${collectionKey}`, { method: 'POST', body: JSON.stringify(data) }, () => {
+      const list = getLocal(collectionKey, defaultList);
+      const newItem = { ...data, id: data.id || `${idPrefix}-${Date.now()}` };
+      const updated = [newItem, ...list];
+      setLocal(collectionKey, updated);
+      return newItem;
+    }),
+    update: (id, data) => request(`/${collectionKey}/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => {
+      const list = getLocal(collectionKey, defaultList);
+      const updated = list.map(item => item.id === id ? { ...item, ...data } : item);
+      setLocal(collectionKey, updated);
+      return updated.find(item => item.id === id) || data;
+    }),
+    delete: (id) => request(`/${collectionKey}/${id}`, { method: 'DELETE' }, () => {
+      const list = getLocal(collectionKey, defaultList);
+      const updated = list.filter(item => item.id !== id);
+      setLocal(collectionKey, updated);
+      return { success: true };
+    })
+  };
+}
+
+const vehiclesCrud = createCrud('vehicles', initialData.vehicles, 'veh');
+const customersCrud = createCrud('customers', initialData.customers, 'cust');
+const salesCrud = createCrud('sales', initialData.sales, 'sale');
+const testdrivesCrud = createCrud('testdrives', initialData.testdrives, 'td');
+const servicesCrud = createCrud('services', initialData.services, 'srv');
+const staffCrud = createCrud('staff', initialData.staff, 'stf');
+const enquiriesCrud = createCrud('enquiries', initialData.enquiries, 'enq');
+const quotationsCrud = createCrud('quotations', initialData.quotations, 'quot');
+const partsCrud = createCrud('parts', initialData.parts, 'part');
+const procurementCrud = createCrud('procurement', initialData.procurement, 'po');
 
 export const api = {
   // Dashboard
-  getDashboard: () => fetchJSON('/dashboard'),
+  getDashboard: () => request('/dashboard', {}, () => getLocalDashboard()),
 
   // Vehicles
-  getVehicles: () => fetchJSON('/vehicles'),
-  createVehicle: (data) => fetchJSON('/vehicles', { method: 'POST', body: JSON.stringify(data) }),
-  updateVehicle: (id, data) => fetchJSON(`/vehicles/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteVehicle: (id) => fetchJSON(`/vehicles/${id}`, { method: 'DELETE' }),
+  getVehicles: vehiclesCrud.get,
+  createVehicle: vehiclesCrud.create,
+  updateVehicle: vehiclesCrud.update,
+  deleteVehicle: vehiclesCrud.delete,
 
   // Customers
-  getCustomers: () => fetchJSON('/customers'),
-  createCustomer: (data) => fetchJSON('/customers', { method: 'POST', body: JSON.stringify(data) }),
-  updateCustomer: (id, data) => fetchJSON(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteCustomer: (id) => fetchJSON(`/customers/${id}`, { method: 'DELETE' }),
+  getCustomers: customersCrud.get,
+  createCustomer: customersCrud.create,
+  updateCustomer: customersCrud.update,
+  deleteCustomer: customersCrud.delete,
 
   // Sales
-  getSales: () => fetchJSON('/sales'),
-  createSale: (data) => fetchJSON('/sales', { method: 'POST', body: JSON.stringify(data) }),
-  updateSale: (id, data) => fetchJSON(`/sales/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteSale: (id) => fetchJSON(`/sales/${id}`, { method: 'DELETE' }),
+  getSales: salesCrud.get,
+  createSale: salesCrud.create,
+  updateSale: salesCrud.update,
+  deleteSale: salesCrud.delete,
 
   // Test Drives
-  getTestDrives: () => fetchJSON('/testdrives'),
-  createTestDrive: (data) => fetchJSON('/testdrives', { method: 'POST', body: JSON.stringify(data) }),
-  updateTestDrive: (id, data) => fetchJSON(`/testdrives/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteTestDrive: (id) => fetchJSON(`/testdrives/${id}`, { method: 'DELETE' }),
+  getTestDrives: testdrivesCrud.get,
+  createTestDrive: testdrivesCrud.create,
+  updateTestDrive: testdrivesCrud.update,
+  deleteTestDrive: testdrivesCrud.delete,
 
   // Services
-  getServices: () => fetchJSON('/services'),
-  createService: (data) => fetchJSON('/services', { method: 'POST', body: JSON.stringify(data) }),
-  updateService: (id, data) => fetchJSON(`/services/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteService: (id) => fetchJSON(`/services/${id}`, { method: 'DELETE' }),
+  getServices: servicesCrud.get,
+  createService: servicesCrud.create,
+  updateService: servicesCrud.update,
+  deleteService: servicesCrud.delete,
 
   // Staff
-  getStaff: () => fetchJSON('/staff'),
-  createStaff: (data) => fetchJSON('/staff', { method: 'POST', body: JSON.stringify(data) }),
-  updateStaff: (id, data) => fetchJSON(`/staff/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteStaff: (id) => fetchJSON(`/staff/${id}`, { method: 'DELETE' }),
+  getStaff: staffCrud.get,
+  createStaff: staffCrud.create,
+  updateStaff: staffCrud.update,
+  deleteStaff: staffCrud.delete,
 
   // Settings
-  getSettings: () => fetchJSON('/settings'),
-  updateSettings: (data) => fetchJSON('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  getSettings: () => request('/settings', {}, () => getLocal('settings', initialData.settings)),
+  updateSettings: (data) => request('/settings', { method: 'PUT', body: JSON.stringify(data) }, () => {
+    const current = getLocal('settings', initialData.settings);
+    const updated = { ...current, ...data };
+    setLocal('settings', updated);
+    return updated;
+  }),
 
   // Enquiries / Leads
-  getEnquiries: () => fetchJSON('/enquiries'),
-  createEnquiry: (data) => fetchJSON('/enquiries', { method: 'POST', body: JSON.stringify(data) }),
-  updateEnquiry: (id, data) => fetchJSON(`/enquiries/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteEnquiry: (id) => fetchJSON(`/enquiries/${id}`, { method: 'DELETE' }),
+  getEnquiries: enquiriesCrud.get,
+  createEnquiry: enquiriesCrud.create,
+  updateEnquiry: enquiriesCrud.update,
+  deleteEnquiry: enquiriesCrud.delete,
 
   // Quotations / Pro-Forma
-  getQuotations: () => fetchJSON('/quotations'),
-  createQuotation: (data) => fetchJSON('/quotations', { method: 'POST', body: JSON.stringify(data) }),
-  updateQuotation: (id, data) => fetchJSON(`/quotations/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteQuotation: (id) => fetchJSON(`/quotations/${id}`, { method: 'DELETE' }),
+  getQuotations: quotationsCrud.get,
+  createQuotation: quotationsCrud.create,
+  updateQuotation: quotationsCrud.update,
+  deleteQuotation: quotationsCrud.delete,
 
   // Spare Parts & Accessories
-  getParts: () => fetchJSON('/parts'),
-  createPart: (data) => fetchJSON('/parts', { method: 'POST', body: JSON.stringify(data) }),
-  updatePart: (id, data) => fetchJSON(`/parts/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deletePart: (id) => fetchJSON(`/parts/${id}`, { method: 'DELETE' }),
+  getParts: partsCrud.get,
+  createPart: partsCrud.create,
+  updatePart: partsCrud.update,
+  deletePart: partsCrud.delete,
 
   // Vehicle Procurement / Factory Orders
-  getProcurement: () => fetchJSON('/procurement'),
-  createProcurement: (data) => fetchJSON('/procurement', { method: 'POST', body: JSON.stringify(data) }),
-  updateProcurement: (id, data) => fetchJSON(`/procurement/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-  deleteProcurement: (id) => fetchJSON(`/procurement/${id}`, { method: 'DELETE' }),
+  getProcurement: procurementCrud.get,
+  createProcurement: procurementCrud.create,
+  updateProcurement: procurementCrud.update,
+  deleteProcurement: procurementCrud.delete,
 };

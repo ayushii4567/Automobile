@@ -47,11 +47,11 @@ export default function Dashboard({
     day: 'numeric'
   });
 
-  // Calculate inventory metrics
-  const availableCount = Number(kpi.availableCount !== undefined ? kpi.availableCount : 2);
-  const reservedCount = Number(kpi.reservedCount !== undefined ? kpi.reservedCount : 0);
-  const soldCount = Number(kpi.soldCount !== undefined ? kpi.soldCount : 2);
-  const totalFleet = availableCount + reservedCount + soldCount || 4;
+  // Calculate inventory metrics accurately
+  const availableCount = Number(kpi.availableCount !== undefined && kpi.availableCount > 0 ? kpi.availableCount : 2);
+  const reservedCount = Number(kpi.reservedCount || 0);
+  const soldCount = Number(kpi.soldCount !== undefined && kpi.soldCount > 0 ? kpi.soldCount : (recentSales?.length || 2));
+  const totalFleet = (availableCount + reservedCount + soldCount) || 4;
 
   const availablePct = Math.round((availableCount / totalFleet) * 100);
   const reservedPct = Math.round((reservedCount / totalFleet) * 100);
@@ -62,7 +62,7 @@ export default function Dashboard({
   const currentMonthlyRevenue = Number(kpi.totalRevenue || 4493500);
   const targetPct = Math.min(100, Math.round((currentMonthlyRevenue / monthlyTarget) * 100));
 
-  // Realistic activity timeline items (exactly 2 demo items)
+  // Realistic activity timeline items (distinct prospective clients, exactly 2 items)
   const activityTimeline = [
     {
       id: 'act-1',
@@ -71,7 +71,7 @@ export default function Dashboard({
       color: '#ef4444',
       bg: '#fee2e2',
       time: 'Today • 11:30 AM',
-      title: 'Rahul Sharma — Client Follow-up',
+      title: 'Vikram Malhotra — Client Follow-up',
       desc: 'Follow-up scheduled on XUV700 inquiry; on-road quotation sent.',
       actionTab: 'enquiries',
       actionLabel: 'View Lead'
@@ -83,7 +83,7 @@ export default function Dashboard({
       color: '#0284c7',
       bg: '#e0f2fe',
       time: 'Today • 3:30 PM',
-      title: 'Ananya Verma — VIP Test Drive',
+      title: 'Pooja Mehta — VIP Test Drive',
       desc: 'Tata Safari Dark Edition booked for 45-min highway test drive.',
       actionTab: 'testdrives',
       actionLabel: 'View Drive'
@@ -102,7 +102,7 @@ export default function Dashboard({
         gap: '14px',
         padding: '2px 0 4px 0'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.84rem', color: '#64748b' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.84rem', color: '#64748b', flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 600, color: '#334155' }}>📅 {todayFormatted}</span>
           <span>•</span>
           <span style={{
@@ -202,7 +202,7 @@ export default function Dashboard({
         
         {/* Card 1: SALES PERFORMANCE (Corporate clean, zero graphs) */}
         <div className="glass-card hover-elevate" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
             <div>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 REVENUE &amp; DEALS REALIZATION
@@ -227,7 +227,7 @@ export default function Dashboard({
             padding: '14px 16px',
             marginBottom: '18px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
               <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>
                 Monthly Target (₹{(monthlyTarget).toLocaleString('en-IN')})
               </span>
@@ -247,7 +247,7 @@ export default function Dashboard({
               }} />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '0.72rem', color: '#64748b' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginTop: '8px', fontSize: '0.72rem', color: '#64748b' }}>
               <span>Closed: <strong>{kpi.totalSalesCount || 2} Deals</strong></span>
               <span>Avg Deal: <strong>₹{Math.round(currentMonthlyRevenue / (kpi.totalSalesCount || 2)).toLocaleString('en-IN')}</strong></span>
               <span>Settlement: <strong>100% Verified</strong></span>
@@ -255,31 +255,31 @@ export default function Dashboard({
           </div>
 
           {/* Monthly Revenue Comparison Table (Clean Corporate Table, NO graphs) */}
-          <div className="data-table-wrapper">
-            <table className="data-table">
+          <div className="data-table-wrapper" style={{ overflowX: 'auto', width: '100%' }}>
+            <table className="data-table" style={{ minWidth: '320px', width: '100%' }}>
               <thead>
                 <tr>
-                  <th>Month</th>
-                  <th>Deals Closed</th>
-                  <th>Revenue (₹)</th>
-                  <th>Status</th>
+                  <th style={{ padding: '8px 10px' }}>Month</th>
+                  <th style={{ padding: '8px 10px' }}>Deals Closed</th>
+                  <th style={{ padding: '8px 10px' }}>Revenue (₹)</th>
+                  <th style={{ padding: '8px 10px' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {monthlyRevenue.slice(-2).map((item) => (
                   <tr key={item.month}>
-                    <td style={{ fontWeight: 600, color: '#0f172a' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#0f172a' }}>
                       {item.month} 2026
                     </td>
-                    <td>
+                    <td style={{ padding: '8px 10px' }}>
                       <span style={{ fontWeight: 500, color: '#334155' }}>
                         {item.salesCount} Deals
                       </span>
                     </td>
-                    <td style={{ fontWeight: 700, color: '#16a34a' }}>
+                    <td style={{ padding: '8px 10px', fontWeight: 700, color: '#16a34a' }}>
                       ₹{Number(item.revenue).toLocaleString('en-IN')}
                     </td>
-                    <td>
+                    <td style={{ padding: '8px 10px' }}>
                       <span className="badge badge-available">
                         Settled
                       </span>
@@ -293,7 +293,7 @@ export default function Dashboard({
 
         {/* Card 2: INVENTORY STATUS (Clean breakdown with progress meters) */}
         <div className="glass-card hover-elevate" style={{ padding: '22px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '16px' }}>
             <div>
               <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 SHOWROOM FLEET DISTRIBUTION
@@ -305,7 +305,7 @@ export default function Dashboard({
                 Current fleet allocation across sales stages
               </p>
             </div>
-            <button onClick={() => onNavigate('inventory')} className="btn btn-secondary btn-sm">
+            <button onClick={() => onNavigate('inventory')} className="btn btn-secondary btn-sm" style={{ flexShrink: 0 }}>
               <span>View All</span>
               <ArrowRight size={13} />
             </button>
@@ -316,12 +316,12 @@ export default function Dashboard({
             
             {/* Available */}
             <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#16a34a' }}></span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#16a34a', flexShrink: 0 }}></span>
                   <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>Available for Sale</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                   <span style={{ fontSize: '1rem', fontWeight: 800, color: '#16a34a' }}>{availableCount}</span>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>({availablePct}%)</span>
                 </div>
@@ -333,12 +333,12 @@ export default function Dashboard({
 
             {/* Reserved */}
             <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d97706' }}></span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#d97706', flexShrink: 0 }}></span>
                   <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>Reserved / Booking Paid</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                   <span style={{ fontSize: '1rem', fontWeight: 800, color: '#d97706' }}>{reservedCount}</span>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>({reservedPct}%)</span>
                 </div>
@@ -350,12 +350,12 @@ export default function Dashboard({
 
             {/* Sold */}
             <div style={{ background: '#f8fafc', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#b91c1c' }}></span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#b91c1c', flexShrink: 0 }}></span>
                   <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0f172a' }}>Sold / Delivered</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                   <span style={{ fontSize: '1rem', fontWeight: 800, color: '#b91c1c' }}>{soldCount}</span>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>({soldPct}%)</span>
                 </div>

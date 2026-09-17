@@ -126,20 +126,26 @@ export default function Header({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: '10px',
       borderBottom: '1px solid #e2e8f0',
       background: '#ffffff',
       position: 'sticky',
       top: 0,
-      zIndex: 30
+      zIndex: 30,
+      width: '100%',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      overflow: 'hidden'
     }}>
       {/* Left: Hamburger Menu (Mobile) & Title */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0', overflow: 'hidden' }}>
         <button
           onClick={onToggleMobileMenu}
           className="show-on-mobile btn btn-secondary btn-icon"
           style={{
             width: '36px',
             height: '36px',
+            minWidth: '36px',
             borderRadius: '8px',
             padding: 0,
             cursor: 'pointer',
@@ -151,7 +157,7 @@ export default function Header({
           <Menu size={18} />
         </button>
 
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, overflow: 'hidden' }}>
           <h1 className="header-title-text" style={{
             fontSize: '1.2rem',
             fontWeight: 700,
@@ -177,10 +183,10 @@ export default function Header({
       </div>
 
       {/* Right Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         
         {/* Global Search Bar (Fluid & Responsive) */}
-        <div ref={searchRef} style={{ position: 'relative', width: 'clamp(130px, 18vw, 240px)' }}>
+        <div ref={searchRef} style={{ position: 'relative', width: 'clamp(100px, 14vw, 230px)', flexShrink: 1 }}>
           <Search 
             size={15} 
             color="#94a3b8" 

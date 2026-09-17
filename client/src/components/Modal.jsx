@@ -33,16 +33,21 @@ export default function Modal({
     <div className="modal-overlay" onClick={onClose}>
       <div 
         className="modal-content" 
-        style={{ maxWidth }} 
+        style={{ '--modal-max-width': maxWidth, maxWidth }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Drag handle for bottom sheet on mobile */}
+        <div className="modal-drag-handle show-on-phone" style={{
+          width: '36px', height: '4px', background: '#e2e8f0',
+          borderRadius: '2px', margin: '10px auto 0',
+        }} />
         <div className="modal-header">
-          <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: '#0f172a' }}>
+          <div style={{ minWidth: 0 }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {title}
             </h3>
             {subtitle && (
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {subtitle}
               </p>
             )}
@@ -50,7 +55,7 @@ export default function Modal({
           <button 
             onClick={onClose}
             className="btn btn-secondary btn-icon"
-            style={{ borderRadius: '50%' }}
+            style={{ borderRadius: '50%', flexShrink: 0 }}
           >
             <X size={18} />
           </button>

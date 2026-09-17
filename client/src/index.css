@@ -58,6 +58,11 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-page);
@@ -67,6 +72,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   overflow-x: hidden;
+  max-width: 100vw;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -551,6 +557,7 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 40;
   user-select: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  flex-shrink: 0;
 }
 
 /* Touch-friendly Data Table Container */
@@ -561,6 +568,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-color);
   background: #ffffff;
   position: relative;
+  max-width: 100%;
 }
 
 /* Responsive Grid Utilities */
@@ -585,8 +593,25 @@ h1, h2, h3, h4, h5, h6 {
 
 .responsive-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+}
+
+/* App Shell */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* Visibility Utilities */
@@ -613,7 +638,7 @@ h1, h2, h3, h4, h5, h6 {
     display: flex !important;
   }
 
-  /* Sidebar becomes off-canvas drawer */
+  /* Sidebar becomes off-canvas drawer — removed from flex flow */
   .sidebar-container {
     position: fixed;
     top: 0;
@@ -621,7 +646,7 @@ h1, h2, h3, h4, h5, h6 {
     bottom: 0;
     height: 100%;
     width: 280px;
-    min-width: 280px;
+    min-width: 0;
     z-index: 1050;
     transform: translateX(-100%);
     box-shadow: none;
@@ -634,18 +659,29 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Main page layout */
   .main-content-layout {
-    padding: 16px !important;
+    padding: 14px !important;
   }
 
   /* Responsive Grids collapse to single column */
   .responsive-grid-2,
   .responsive-finance-grid {
     grid-template-columns: 1fr !important;
-    gap: 16px;
+    gap: 14px !important;
   }
 
   .header-container {
-    padding: 0 16px !important;
+    padding: 0 14px !important;
+  }
+
+  /* Tables on mobile — force scroll */
+  .data-table-wrapper {
+    overflow-x: auto;
+  }
+
+  /* Prevent page-level overflow */
+  .app-main {
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
 
@@ -671,27 +707,29 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .responsive-kpi-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
   }
 
-  /* Modals on mobile devices */
+  /* Modals on mobile devices — bottom sheet style */
   .modal-overlay {
-    padding: 10px;
-    align-items: center;
+    padding: 0;
+    align-items: flex-end;
   }
 
   .modal-content {
-    width: 96vw !important;
-    max-height: 92vh !important;
-    border-radius: var(--radius-lg);
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94vh !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
   }
 
   .modal-header {
-    padding: 14px 18px;
+    padding: 14px 16px;
   }
 
   .modal-body {
-    padding: 16px;
+    padding: 14px 16px;
   }
 
   .modal-footer {
@@ -708,7 +746,7 @@ h1, h2, h3, h4, h5, h6 {
   .modal-body div[style*="repeat(3"],
   .modal-grid-2 {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
+    gap: 10px !important;
   }
   .modal-body div[style*="gridColumn"],
   .modal-body div[style*="grid-column"] {
@@ -717,10 +755,11 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Toast notification fits cleanly on small screens */
   .toast-notification {
-    top: 14px !important;
-    right: 14px !important;
-    left: 14px !important;
+    top: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
     padding: 10px 14px !important;
+    font-size: 0.82rem !important;
   }
 
   /* Buttons on mobile */
@@ -730,11 +769,48 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Header adjustments */
   .header-title-text {
-    font-size: 1.05rem !important;
+    font-size: 1rem !important;
   }
   .header-sub-text {
     display: none !important;
   }
+
+  /* Card padding reduction */
+  .glass-card {
+    border-radius: var(--radius-md);
+  }
+
+  /* Table font size on phones */
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
 }
 
+/* EXTRA SMALL PHONES (<= 400px) */
+@media (max-width: 400px) {
+  .responsive-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
 
+  .main-content-layout {
+    padding: 10px !important;
+  }
+}
+
+/* ======= CRITICAL: Override inline maxWidth on modals for mobile ======= */
+/* Inline styles have higher specificity, so we use :where() or force via attribute */
+@media (max-width: 640px) {
+  /* Modal full-width override — beats inline style via attribute selector trick */
+  .modal-content[style] {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+  
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+}

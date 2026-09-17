@@ -577,7 +577,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'transparent' }}>
+    <div className="app-shell">
       
       {/* Toast Alert Banner */}
       {toast && (
@@ -627,7 +627,7 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="app-main">
         <Header 
           activeTab={activeTab}
           searchQuery={searchQuery}

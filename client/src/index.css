@@ -623,6 +623,7 @@ h1, h2, h3, h4, h5, h6 {
   user-select: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 /* Touch-friendly Data Table Container */
@@ -696,6 +697,7 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   width: 100%;
   overflow-x: hidden;
+  background: linear-gradient(to right, #111827 265px, var(--bg-page) 265px);
 }
 
 .app-main {
@@ -783,6 +785,11 @@ h1, h2, h3, h4, h5, h6 {
   .app-main {
     max-width: 100vw;
     overflow-x: hidden;
+  }
+
+  /* Reset app-shell gradient — no sidebar column on mobile */
+  .app-shell {
+    background: var(--bg-page);
   }
 }
 

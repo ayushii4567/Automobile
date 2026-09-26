@@ -616,14 +616,14 @@ h1, h2, h3, h4, h5, h6 {
   border-right: 1px solid #1f2937;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  position: sticky;
-  top: 0;
+  height: 100%;
+  position: relative;
   z-index: 40;
   user-select: none;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Touch-friendly Data Table Container */
@@ -691,12 +691,12 @@ h1, h2, h3, h4, h5, h6 {
   gap: 16px;
 }
 
-/* App Shell */
+/* App Shell — Fixed 100vh split-scroll layout */
 .app-shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   background: linear-gradient(to right, #111827 265px, var(--bg-page) 265px);
 }
 
@@ -705,8 +705,10 @@ h1, h2, h3, h4, h5, h6 {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
   overflow-x: hidden;
   max-width: 100%;
+  height: 100%;
 }
 
 /* Visibility Utilities */
@@ -785,11 +787,15 @@ h1, h2, h3, h4, h5, h6 {
   .app-main {
     max-width: 100vw;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
   }
 
   /* Reset app-shell gradient — no sidebar column on mobile */
   .app-shell {
     background: var(--bg-page);
+    height: 100vh;
+    overflow: hidden;
   }
 }
 

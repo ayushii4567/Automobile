@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Trash2, Edit2, Phone, Mail, Car, ArrowRight, MessageSquare } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Phone, Mail, Car, ArrowRight, MessageSquare, UserCheck } from 'lucide-react';
 
 const STATUS_COLORS = {
   'New':       { bg: '#eff6ff', color: '#2563eb', border: '#bfdbfe' },
@@ -12,7 +12,15 @@ const SOURCE_ICONS = {
   'Walk-in': '🚪', 'Phone Call': '📞', 'Website': '🌐', 'Referral': '👥', 'Social Media': '📱',
 };
 
-export default function Enquiries({ enquiries = [], onAddEnquiry, onEditEnquiry, onDeleteEnquiry, onConvertTestDrive, searchQuery = '' }) {
+export default function Enquiries({ 
+  enquiries = [], 
+  onAddEnquiry, 
+  onEditEnquiry, 
+  onDeleteEnquiry, 
+  onConvertTestDrive, 
+  onConvertCustomer, 
+  searchQuery = '' 
+}) {
   const [statusFilter, setStatusFilter] = useState('All');
   const [localSearch, setLocalSearch] = useState('');
 
@@ -148,6 +156,11 @@ export default function Enquiries({ enquiries = [], onAddEnquiry, onEditEnquiry,
                         <button onClick={() => onEditEnquiry(enq)} className="btn btn-secondary btn-sm btn-icon" title="Edit">
                           <Edit2 size={13} />
                         </button>
+                        {enq.status !== 'Converted' && onConvertCustomer && (
+                          <button onClick={() => onConvertCustomer(enq)} className="btn btn-primary btn-sm" title="Convert to Customer" style={{ fontSize: '0.72rem', padding: '4px 8px', background: '#16a34a', borderColor: '#16a34a' }}>
+                            <UserCheck size={12} /> +Customer
+                          </button>
+                        )}
                         {enq.status !== 'Converted' && (
                           <button onClick={() => onConvertTestDrive && onConvertTestDrive(enq)} className="btn btn-secondary btn-sm" title="Convert to Test Drive" style={{ fontSize: '0.72rem', padding: '4px 8px' }}>
                             <ArrowRight size={12} /> Drive

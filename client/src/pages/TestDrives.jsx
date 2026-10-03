@@ -10,14 +10,16 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   XCircle, 
-  Trash2 
+  Trash2,
+  Calculator
 } from 'lucide-react';
 
 export default function TestDrives({ 
   testdrives = [], 
   onAddTestDrive, 
   onUpdateStatus, 
-  onDeleteTestDrive 
+  onDeleteTestDrive,
+  onCreateEstimate
 }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -112,7 +114,7 @@ export default function TestDrives({
       {/* Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
         gap: '18px'
       }}>
         {filtered.map((td) => (
@@ -215,7 +217,23 @@ export default function TestDrives({
                 <Trash2 size={12} />
               </button>
 
-              <div style={{ display: 'flex', gap: '6px' }}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                {onCreateEstimate && (
+                  <button
+                    onClick={() => onCreateEstimate({
+                      customerName: td.customerName,
+                      customerPhone: td.customerPhone,
+                      vehicleName: td.vehicleName,
+                      vehicleId: td.vehicle_id || td.vehicleId
+                    })}
+                    className="btn btn-secondary btn-sm"
+                    title="Generate Estimate from this Test Drive"
+                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                  >
+                    <Calculator size={12} />
+                    <span>Estimate</span>
+                  </button>
+                )}
                 {td.status === 'Scheduled' && (
                   <>
                     <button 

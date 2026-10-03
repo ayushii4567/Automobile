@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../Modal';
-import { DollarSign, CheckCircle2, ShieldCheck, FileCheck } from 'lucide-react';
+import { DollarSign, CheckCircle2, ShieldCheck, AlertCircle, FileCheck } from 'lucide-react';
 
 export default function SaleModal({ 
   isOpen, 
@@ -15,57 +15,81 @@ export default function SaleModal({
   const [customerName, setCustomerName] = useState('');
   const [basePrice, setBasePrice] = useState(0);
   const [discount, setDiscount] = useState(0);
-  const [taxRate, setTaxRate] = useState(settings.defaultTaxRate || 18.0);
-  const [paymentMethod, setPaymentMethod] = useState('Bank NEFT / RTGS');
-  const [salesAgent, setSalesAgent] = useState('Rajesh Sharma');
+  const [taxRate, setTaxRate] = useState(Number(settings.tax_rate || settings.defaultTaxRate || 18.0));
+  const [paymentMethod, setPaymentMethod] = useState('Net Banking / RTGS');
+  const [salesAgent, setSalesAgent] = useState('Julian Vance');
   const [deliveryDate, setDeliveryDate] = useState(
-    new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
 
   useEffect(() => {
     if (preselectedVehicle) {
-      setSelectedVehicleId(preselectedVehicle.id);
-      setBasePrice(Number(preselectedVehicle.price || 0));
-    } else if (vehicles.length > 0 && !selectedVehicleId) {
+      setSelectedVehicleId(preselectedVehicle.id || preselectedVehicle.vehicleId);
+      setBasePrice(Number(preselectedVehicle.price || preselectedVehicle.ex_showroom_price || preselectedVehicle.exShowroomPrice || 0));
+      if (preselectedVehicle.customerName || preselectedVehicle.customer_name) {
+        setCustomerName(preselectedVehicle.customerName || preselectedVehicle.customer_name);
+      }
+    } else if (vehicles.length > 0) {
       const avail = vehicles.find(v => v.status === 'Available') || vehicles[0];
       setSelectedVehicleId(avail.id);
-      setBasePrice(Number(avail.price || 0));
+      setBasePrice(Number(avail.price || avail.ex_showroom_price || 0));
     }
-  }, [preselectedVehicle, vehicles, isOpen]);
+    if (settings.tax_rate || settings.defaultTaxRate) {
+      setTaxRate(Number(settings.tax_rate || settings.defaultTaxRate));
+    }
+  }, [preselectedVehicle, vehicles, settings, isOpen]);
+
+  const selectedVehicle = vehicles.find(item => item.id === selectedVehicleId);
+  const isVehicleSold = selectedVehicle?.status === 'Sold';
+  const isVehicleUnavailable = selectedVehicle && selectedVehicle.status !== 'Available';
 
   const handleVehicleChange = (id) => {
     setSelectedVehicleId(id);
     const v = vehicles.find(item => item.id === id);
     if (v) {
-      setBasePrice(Number(v.price || 0));
+      setBasePrice(Number(v.price || v.ex_showroom_price || 0));
     }
-  };
-
-  const handleCustomerChange = (val) => {
-    setCustomerName(val);
   };
 
   // Calculations
   const taxableAmount = Math.max(0, basePrice - Number(discount || 0));
-  const taxAmount = +(taxableAmount * (Number(taxRate || 8.5) / 100)).toFixed(2);
+  const taxAmount = +(taxableAmount * (Number(taxRate || 18) / 100)).toFixed(2);
+  const cgstAmount = +(taxAmount / 2).toFixed(2);
+  const sgstAmount = +(taxAmount / 2).toFixed(2);
   const totalAmount = +(taxableAmount + taxAmount).toFixed(2);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const vehicle = vehicles.find(v => v.id === selectedVehicleId);
-    
+    if (isVehicleSold || isVehicleUnavailable) {
+      alert(`Cannot sell vehicle: Current status is '${selectedVehicle?.status}'. Only Available vehicles can be sold.`);
+      return;
+    }
+
+    const matchedCustomer = customers.find(c => c.name.toLowerCase() === customerName.trim().toLowerCase());
+
     const salePayload = {
+      quotation_id: preselectedVehicle?.quotationId || preselectedVehicle?.quotation_id || null,
+      vehicle_id: selectedVehicleId,
       vehicleId: selectedVehicleId,
-      vehicleName: vehicle ? `${vehicle.brand} ${vehicle.model} (${vehicle.year})` : 'Exotic Vehicle',
-      vin: vehicle ? vehicle.vin : 'VIN-PENDING',
-      customerName: customerName || 'VIP Client',
+      vehicleName: selectedVehicle ? `${selectedVehicle.brand} ${selectedVehicle.model} (${selectedVehicle.year})` : 'Vehicle',
+      vin: selectedVehicle ? selectedVehicle.vin : 'VIN-TBD',
+      customer_id: matchedCustomer ? matchedCustomer.id : null,
+      customerId: matchedCustomer ? matchedCustomer.id : null,
+      customer_name: customerName,
+      customerName: customerName,
+      base_price: basePrice,
       basePrice,
       discount: Number(discount || 0),
+      tax_rate: Number(taxRate),
       taxRate: Number(taxRate),
       taxAmount,
+      total_amount: totalAmount,
       totalAmount,
+      payment_method: paymentMethod,
       paymentMethod,
       salesAgent,
+      booking_date: new Date().toISOString().split('T')[0],
+      expected_delivery_date: deliveryDate,
       deliveryDate
     };
 
@@ -78,14 +102,33 @@ export default function SaleModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Execute Vehicle Deal & Bill of Sale"
-      subtitle="Finalize acquisition contract, calculate taxation, and register ownership"
-      maxWidth="680px"
+      subtitle="Issue binding sales order, calculate GST, and automatically generate linked invoice"
+      maxWidth="700px"
     >
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {isVehicleSold && (
+          <div style={{
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '6px',
+            padding: '12px 16px',
+            color: '#dc2626',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontSize: '0.85rem'
+          }}>
+            <AlertCircle size={18} />
+            <div>
+              <strong>Vehicle is already SOLD!</strong> This vehicle has already been purchased and cannot be resold.
+            </div>
+          </div>
+        )}
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           {/* Vehicle Selector */}
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
-            <label className="form-label">Select Vehicle from Inventory</label>
+            <label className="form-label">Select Vehicle from Inventory *</label>
             <select
               className="form-select"
               value={selectedVehicleId}
@@ -93,8 +136,8 @@ export default function SaleModal({
               required
             >
               {vehicles.map(v => (
-                <option key={v.id} value={v.id}>
-                  {v.brand} {v.model} ({v.year}) - ₹{Number(v.price).toLocaleString('en-IN')} [{v.status}]
+                <option key={v.id} value={v.id} disabled={v.status === 'Sold'}>
+                  {v.brand} {v.model} ({v.year}) - ₹{Number(v.price || v.ex_showroom_price).toLocaleString('en-IN')} [{v.status}] {v.status === 'Sold' ? '— UNAVAILABLE' : ''}
                 </option>
               ))}
             </select>
@@ -102,17 +145,17 @@ export default function SaleModal({
 
           {/* Customer Input */}
           <div className="form-group">
-            <label className="form-label">Purchaser / VIP Client</label>
+            <label className="form-label">Purchaser / Customer Name *</label>
             <input
               type="text"
-              list="customer-list"
-              placeholder="Select or type client name"
+              list="customer-datalist"
+              placeholder="Select or enter customer name"
               className="form-input"
               value={customerName}
-              onChange={(e) => handleCustomerChange(e.target.value)}
+              onChange={(e) => setCustomerName(e.target.value)}
               required
             />
-            <datalist id="customer-list">
+            <datalist id="customer-datalist">
               {customers.map(c => (
                 <option key={c.id} value={c.name} />
               ))}
@@ -121,20 +164,21 @@ export default function SaleModal({
 
           {/* Sales Advisor */}
           <div className="form-group">
-            <label className="form-label">Assigned Sales Director</label>
+            <label className="form-label">Assigned Sales Executive</label>
             <select
               className="form-select"
               value={salesAgent}
               onChange={(e) => setSalesAgent(e.target.value)}
             >
-              <option value="Rajesh Sharma">Rajesh Sharma (Senior Sales Manager)</option>
-              <option value="Priya Patel">Priya Patel (Key Account Executive)</option>
+              <option value="Julian Vance">Julian Vance (Senior Client Advisor)</option>
+              <option value="Alex Rivera">Alex Rivera (Key Account Executive)</option>
+              <option value="Marcus Vance">Marcus Vance (Showroom Director)</option>
             </select>
           </div>
 
           {/* Base Price */}
           <div className="form-group">
-            <label className="form-label">Base Agreed Price (₹ INR)</label>
+            <label className="form-label">Base Agreed Price (₹ INR) *</label>
             <input
               type="number"
               className="form-input"
@@ -146,7 +190,7 @@ export default function SaleModal({
 
           {/* Executive Incentive / Discount */}
           <div className="form-group">
-            <label className="form-label">Executive Discount / Incentive (₹)</label>
+            <label className="form-label">Showroom Discount / Incentive (₹)</label>
             <input
               type="number"
               className="form-input"
@@ -155,25 +199,25 @@ export default function SaleModal({
             />
           </div>
 
-          {/* Payment Instrument */}
+          {/* Payment Method */}
           <div className="form-group">
-            <label className="form-label">Payment Instrument</label>
+            <label className="form-label">Primary Payment Method</label>
             <select
               className="form-select"
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
             >
-              <option value="Bank NEFT / RTGS">Bank NEFT / RTGS</option>
-              <option value="Vehicle Loan / EMI">Vehicle Loan / EMI Financing</option>
-              <option value="Demand Draft">Demand Draft (Bank DD)</option>
-              <option value="UPI / Net Banking">UPI / Corporate Net Banking</option>
-              <option value="Cheque">Payee Account Cheque</option>
+              <option value="Net Banking / RTGS">Net Banking / RTGS Online Transfer</option>
+              <option value="Car Loan / Bank">Bank Auto Loan Disbursal</option>
+              <option value="UPI / Card">UPI / Corporate Credit Card</option>
+              <option value="Cheque">Bank Demand Draft / Cheque</option>
+              <option value="Cash">Cash at Dealership Cashier</option>
             </select>
           </div>
 
           {/* Delivery Date */}
           <div className="form-group">
-            <label className="form-label">Handover / Delivery Date</label>
+            <label className="form-label">Expected Handover / Delivery Date</label>
             <input
               type="date"
               className="form-input"
@@ -189,37 +233,45 @@ export default function SaleModal({
           background: '#f8fafc',
           border: '1px solid #e2e8f0',
           borderRadius: '8px',
-          padding: '14px 18px',
+          padding: '16px 20px',
           display: 'flex',
           flexDirection: 'column',
           gap: '6px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
             <span>Vehicle Base Price:</span>
-            <span style={{ color: '#0f172a', fontWeight: 500 }}>₹{basePrice.toLocaleString('en-IN')}</span>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>₹{basePrice.toLocaleString('en-IN')}</span>
           </div>
           {Number(discount) > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#dc2626' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#dc2626' }}>
               <span>Showroom Incentive:</span>
               <span>-₹{Number(discount).toLocaleString('en-IN')}</span>
             </div>
           )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#64748b' }}>
+            <span>Taxable Amount:</span>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>₹{taxableAmount.toLocaleString('en-IN')}</span>
+          </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
-            <span>Sales Tax ({taxRate}% GST):</span>
-            <span style={{ color: '#0f172a', fontWeight: 500 }}>₹{taxAmount.toLocaleString('en-IN')}</span>
+            <span>CGST ({(taxRate / 2).toFixed(1)}%):</span>
+            <span style={{ color: '#0f172a' }}>₹{cgstAmount.toLocaleString('en-IN')}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#64748b' }}>
+            <span>SGST ({(taxRate / 2).toFixed(1)}%):</span>
+            <span style={{ color: '#0f172a' }}>₹{sgstAmount.toLocaleString('en-IN')}</span>
           </div>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            fontSize: '1.15rem',
-            fontWeight: 700,
+            fontSize: '1.2rem',
+            fontWeight: 800,
             color: '#16a34a',
-            borderTop: '1px solid #e2e8f0',
+            borderTop: '2px solid #e2e8f0',
             paddingTop: '8px',
             marginTop: '4px'
           }}>
-            <span>Final Settlement:</span>
+            <span>Total On-Road Value:</span>
             <span>₹{totalAmount.toLocaleString('en-IN')}</span>
           </div>
         </div>
@@ -229,7 +281,12 @@ export default function SaleModal({
           <button type="button" onClick={onClose} className="btn btn-secondary">
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary">
+          <button 
+            type="submit" 
+            className="btn btn-primary"
+            disabled={isVehicleSold || isVehicleUnavailable}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
             <DollarSign size={16} />
             <span>Generate Official Bill & Invoice</span>
           </button>

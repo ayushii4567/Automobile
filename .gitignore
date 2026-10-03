@@ -23,3 +23,13 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# SQLite & generated data
+*.db
+*.db-shm
+*.db-wal
+server/data/*.db*
+server/data/backups/*
+!server/data/backups/.gitkeep
+server/data/documents/*
+!server/data/documents/.gitkeep

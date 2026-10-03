@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
+import { api } from '../api';
 
 export default function Login({ onLogin }) {
   const [selectedRole, setSelectedRole] = useState('admin');
@@ -24,7 +25,7 @@ export default function Login({ onLogin }) {
       username: 'admin',
       password: 'admin123',
       name: 'Marcus Vance',
-      role: 'admin',
+      role: 'ADMIN',
       title: 'Showroom Director / General Manager',
       tagline: 'Full operational authority & executive oversight'
     },
@@ -32,7 +33,7 @@ export default function Login({ onLogin }) {
       username: 'sales',
       password: 'sales123',
       name: 'Alex Rivera',
-      role: 'sales',
+      role: 'SALES_EXECUTIVE',
       title: 'Senior Sales Executive',
       tagline: 'Customer relations, quotations, test drives & deals'
     }
@@ -45,21 +46,19 @@ export default function Login({ onLogin }) {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
-        onLogin(accounts.admin);
-      } else if (username === 'sales' && password === 'sales123') {
-        onLogin(accounts.sales);
-      } else {
-        setError('Invalid username or password. Please use default credentials shown below.');
-        setIsSubmitting(false);
-      }
-    }, 350);
+    try {
+      const res = await api.login(username, password);
+      onLogin(res.user);
+    } catch (err) {
+      setError(err.message || 'Invalid username or password. Please use default credentials shown below.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

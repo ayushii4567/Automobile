@@ -13,15 +13,36 @@ import Settings from './pages/Settings';
 import Finance from './pages/Finance';
 import Enquiries from './pages/Enquiries';
 import Quotations from './pages/Quotations';
+import Estimates from './pages/Estimates';
 import Parts from './pages/Parts';
 import Procurement from './pages/Procurement';
 import Login from './pages/Login';
+
+// 9 New Modules
+import PDI from './pages/PDI';
+import TradeIns from './pages/TradeIns';
+import FinanceApps from './pages/FinanceApps';
+import Insurance from './pages/Insurance';
+import Warranties from './pages/Warranties';
+import Appointments from './pages/Appointments';
+import Vendors from './pages/Vendors';
+import Payments from './pages/Payments';
+import Feedback from './pages/Feedback';
+import AuditLogs from './pages/AuditLogs';
+import Payroll from './pages/Payroll';
+import Expenses from './pages/Expenses';
+import Communications from './pages/Communications';
+import Reminders from './pages/Reminders';
+import Documents from './pages/Documents';
+import Backup from './pages/Backup';
 
 import InvoiceModal from './components/InvoiceModal';
 import VehicleModal from './components/modals/VehicleModal';
 import CustomerModal from './components/modals/CustomerModal';
 import SaleModal from './components/modals/SaleModal';
 import TestDriveModal from './components/modals/TestDriveModal';
+import EstimateModal from './components/modals/EstimateModal';
+import EstimateViewModal from './components/modals/EstimateViewModal';
 import ServiceModal from './components/modals/ServiceModal';
 import StaffModal from './components/modals/StaffModal';
 import EnquiryModal from './components/modals/EnquiryModal';
@@ -29,12 +50,13 @@ import QuotationModal from './components/modals/QuotationModal';
 import QuotationViewModal from './components/modals/QuotationViewModal';
 import PartModal from './components/modals/PartModal';
 import ProcurementModal from './components/modals/ProcurementModal';
+import ReceiptModal from './components/ReceiptModal';
 
 import { api } from './api';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function App() {
-  // Authentication state (Admin or Sales Executive)
+  // Authentication state (ADMIN or SALES_EXECUTIVE)
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('apex_user');
@@ -49,7 +71,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
 
-  // Data states
+  // Existing Data states
   const [dashboardData, setDashboardData] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -59,14 +81,35 @@ export default function App() {
   const [staff, setStaff] = useState([]);
   const [settings, setSettings] = useState({});
   const [enquiries, setEnquiries] = useState([]);
+  const [estimates, setEstimates] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [parts, setParts] = useState([]);
   const [procurement, setProcurement] = useState([]);
+
+  // 9 New Module Data states
+  const [pdiList, setPdiList] = useState([]);
+  const [tradeIns, setTradeIns] = useState([]);
+  const [financeApps, setFinanceApps] = useState([]);
+  const [insurance, setInsurance] = useState([]);
+  const [warranties, setWarranties] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [feedback, setFeedback] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [payroll, setPayroll] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [remindersCount, setRemindersCount] = useState(0);
+  const [campaignsCount, setCampaignsCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
 
   // Modals state
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [selectedInvoiceSale, setSelectedInvoiceSale] = useState(null);
+  const [initialPaymentData, setInitialPaymentData] = useState(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
 
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
@@ -79,6 +122,14 @@ export default function App() {
 
   const [isTestDriveModalOpen, setIsTestDriveModalOpen] = useState(false);
   const [testDriveInitialData, setTestDriveInitialData] = useState(null);
+
+  const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
+  const [editingEstimate, setEditingEstimate] = useState(null);
+  const [estimateInitialData, setEstimateInitialData] = useState(null);
+  const [isEstimateViewOpen, setIsEstimateViewOpen] = useState(false);
+  const [selectedEstimateForView, setSelectedEstimateForView] = useState(null);
+
+  const [financeInitialData, setFinanceInitialData] = useState(null);
 
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
@@ -99,217 +150,597 @@ export default function App() {
   const [isProcurementModalOpen, setIsProcurementModalOpen] = useState(false);
   const [editingProcurement, setEditingProcurement] = useState(null);
 
+  // Verify session persistence on mount
+  useEffect(() => {
+    async function verifySession() {
+      const token = localStorage.getItem('apex_token');
+      if (token) {
+        try {
+          const user = await api.getMe();
+          if (user) {
+            setCurrentUser(user);
+            localStorage.setItem('apex_user', JSON.stringify(user));
+          }
+        } catch {
+          setCurrentUser(null);
+          localStorage.removeItem('apex_user');
+          localStorage.removeItem('apex_token');
+        }
+      }
+    }
+    verifySession();
+  }, []);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
+
+  const userRole = (currentUser?.role || 'ADMIN').toUpperCase();
+  const isAdmin = userRole === 'ADMIN';
 
   const handleLogin = (user) => {
     setCurrentUser(user);
     try {
       localStorage.setItem('apex_user', JSON.stringify(user));
     } catch {}
-    if (user.role === 'sales' && ['staff', 'settings', 'reports', 'parts', 'procurement', 'service'].includes(activeTab)) {
+    const role = (user.role || '').toUpperCase();
+    if (role !== 'ADMIN' && ['staff', 'settings', 'reports', 'parts', 'procurement', 'vendors', 'auditlogs', 'payroll', 'expenses'].includes(activeTab)) {
       setActiveTab('dashboard');
     }
-    showToast(`Signed in as ${user.name} (${user.role === 'admin' ? 'Administrator' : 'Sales Executive'})`);
+    showToast(`Signed in as ${user.name} (${role === 'ADMIN' ? 'Administrator' : 'Sales Floor Executive'})`);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {}
     setCurrentUser(null);
     try {
       localStorage.removeItem('apex_user');
+      localStorage.removeItem('apex_token');
     } catch {}
     setActiveTab('dashboard');
-    showToast('Logged out of session.');
+    showToast('Logged out of dealership session.');
   };
 
-  // Fetch all data
+  // Fetch module datasets based on RBAC permissions
   const loadAllData = useCallback(async () => {
+    if (!currentUser) return;
     try {
       setLoading(true);
-      const [dash, vehs, custs, sls, tds, srvs, stf, stgs, enqs, quots, prts, procs] = await Promise.all([
+      const isRoleAdmin = (currentUser?.role || '').toUpperCase() === 'ADMIN';
+
+      const commonRequests = [
         api.getDashboard().catch(() => null),
         api.getVehicles().catch(() => []),
         api.getCustomers().catch(() => []),
         api.getSales().catch(() => []),
         api.getTestDrives().catch(() => []),
+        api.getEnquiries().catch(() => []),
+        api.getEstimates().catch(() => []),
+        api.getQuotations().catch(() => []),
+        api.getPDI().catch(() => []),
+        api.getTradeIns().catch(() => []),
+        api.getFinanceApps().catch(() => []),
+        api.getInsurance().catch(() => []),
+        api.getWarranties().catch(() => []),
+        api.getAppointments().catch(() => []),
+        api.getPayments().catch(() => []),
+        api.getFeedback().catch(() => []),
+        api.getDealershipProfile().catch(() => ({})),
+        api.getAutomatedReminders().catch(() => null),
+        api.getCampaigns().catch(() => [])
+      ];
+
+      const adminRequests = isRoleAdmin ? [
         api.getServices().catch(() => []),
         api.getStaff().catch(() => []),
         api.getSettings().catch(() => ({})),
-        api.getEnquiries().catch(() => []),
-        api.getQuotations().catch(() => []),
         api.getParts().catch(() => []),
-        api.getProcurement().catch(() => [])
-      ]);
+        api.getProcurement().catch(() => []),
+        api.getVendors().catch(() => []),
+        api.getAuditLogs().catch(() => []),
+        api.getPayroll().catch(() => []),
+        api.getExpenses().catch(() => [])
+      ] : [
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve({}),
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve([]),
+        Promise.resolve([])
+      ];
 
-      setDashboardData(dash);
-      setVehicles(vehs);
-      setCustomers(custs);
-      setSales(sls);
-      setTestdrives(tds);
-      setServices(srvs);
-      setStaff(stf);
-      setSettings(stgs);
-      setEnquiries(enqs);
-      setQuotations(quots);
-      setParts(prts);
-      setProcurement(procs);
+      const [
+        dash, vehs, custs, sls, tds, enqs, ests, quots,
+        pdis, trades, finApps, ins, wars, apts, pays, fbs, prof, rems, camps,
+        srvs, stf, stgs, prts, procs, vends, logs, payr, exps
+      ] = await Promise.all([...commonRequests, ...adminRequests]);
+
+      if (dash) setDashboardData(dash);
+      setVehicles(vehs || []);
+      setCustomers(custs || []);
+      setSales(sls || []);
+      setTestdrives(tds || []);
+      setEnquiries(enqs || []);
+      setEstimates(ests || []);
+      setQuotations(quots || []);
+      setPdiList(pdis || []);
+      setTradeIns(trades || []);
+      setFinanceApps(finApps || []);
+      setInsurance(ins || []);
+      setWarranties(wars || []);
+      setAppointments(apts || []);
+      setPayments(pays || []);
+      setFeedback(fbs || []);
+      if (rems?.totalReminders !== undefined) setRemindersCount(rems.totalReminders);
+      if (Array.isArray(camps)) setCampaignsCount(camps.length);
+      setServices(srvs || []);
+      setStaff(stf || []);
+      setSettings({ ...(prof || {}), ...(stgs || {}) });
+      setParts(prts || []);
+      setProcurement(procs || []);
+      setVendors(vends || []);
+      setAuditLogs(logs || []);
+      setPayroll(payr || []);
+      setExpenses(exps || []);
     } catch (err) {
-      console.error('Data load error:', err);
-      showToast('Error syncing with backend', 'error');
+      console.error('Failed to load showroom datasets:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     loadAllData();
   }, [loadAllData]);
 
-  // Refresh dashboard metrics
-  const refreshDashboard = async () => {
-    try {
-      const dash = await api.getDashboard();
-      setDashboardData(dash);
-    } catch (e) {}
+  const handleTriggerPayment = (data) => {
+    setInitialPaymentData(data);
+    setActiveTab('payments');
   };
 
-  // ================= VEHICLE HANDLERS =================
-  const handleSaveVehicle = async (vehicleData) => {
+  // ================= CRUD HANDLERS =================
+
+  // Vehicles
+  const handleSaveVehicle = async (data) => {
     try {
       if (editingVehicle) {
-        const updated = await api.updateVehicle(editingVehicle.id, vehicleData);
+        const updated = await api.updateVehicle(editingVehicle.id, data);
         setVehicles(prev => prev.map(v => v.id === editingVehicle.id ? updated : v));
-        showToast(`Vehicle "${updated.brand} ${updated.model}" updated.`);
+        showToast(`Vehicle ${data.brand} ${data.model} updated successfully.`);
       } else {
-        const created = await api.createVehicle(vehicleData);
+        const created = await api.createVehicle(data);
         setVehicles(prev => [created, ...prev]);
-        showToast(`Supercar "${created.brand} ${created.model}" added to showroom.`);
+        showToast(`New vehicle ${data.brand} ${data.model} added to stock.`);
       }
-      refreshDashboard();
-    } catch (err) {
-      showToast(err.message || 'Failed to save vehicle', 'error');
+      setIsVehicleModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save vehicle.', 'error');
     }
   };
 
   const handleDeleteVehicle = async (id) => {
-    if (!window.confirm('Remove this vehicle from showroom inventory?')) return;
+    if (!window.confirm('Are you sure you want to remove this vehicle from inventory?')) return;
     try {
       await api.deleteVehicle(id);
       setVehicles(prev => prev.filter(v => v.id !== id));
-      showToast('Vehicle removed from catalog.');
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to delete vehicle', 'error');
+      showToast('Vehicle removed from inventory.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete vehicle.', 'error');
     }
   };
 
-  // ================= CUSTOMER HANDLERS =================
-  const handleSaveCustomer = async (custData) => {
+  // Customers
+  const handleSaveCustomer = async (data) => {
     try {
       if (editingCustomer) {
-        const updated = await api.updateCustomer(editingCustomer.id, custData);
+        const updated = await api.updateCustomer(editingCustomer.id, data);
         setCustomers(prev => prev.map(c => c.id === editingCustomer.id ? updated : c));
-        showToast(`Client dossier "${updated.name}" updated.`);
+        showToast(`Customer ${data.name} updated.`);
       } else {
-        const created = await api.createCustomer(custData);
+        const created = await api.createCustomer(data);
         setCustomers(prev => [created, ...prev]);
-        showToast(`Client "${created.name}" registered.`);
+        showToast(`Customer ${data.name} registered.`);
       }
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to save client', 'error');
+      setIsCustomerModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save customer.', 'error');
     }
   };
 
   const handleDeleteCustomer = async (id) => {
-    if (!window.confirm('Archive this client profile?')) return;
+    if (!window.confirm('Are you sure you want to delete this customer record?')) return;
     try {
       await api.deleteCustomer(id);
       setCustomers(prev => prev.filter(c => c.id !== id));
-      showToast('Client profile removed.');
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to delete client', 'error');
+      showToast('Customer record deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete customer.', 'error');
     }
   };
 
-  // ================= SALES HANDLERS =================
-  const handleSaveSale = async (saleData) => {
+  // Sales (Connected Workflow)
+  const handleSaveSale = async (data) => {
     try {
-      const created = await api.createSale(saleData);
+      const created = await api.createSale(data);
       setSales(prev => [created, ...prev]);
-      showToast(`Sale finalized! Invoice ${created.invoiceNo} issued.`);
-      
-      if (saleData.vehicleId) {
-        const updatedVehs = await api.getVehicles();
-        setVehicles(updatedVehs);
-      }
-
-      refreshDashboard();
+      showToast(`Sale Order #${created.saleOrderNumber || created.invoiceNo} executed! Vehicle marked SOLD.`);
+      setIsSaleModalOpen(false);
+      await loadAllData();
       setSelectedInvoiceSale(created);
       setIsInvoiceOpen(true);
     } catch (err) {
-      showToast('Failed to record sale deal', 'error');
+      showToast(err.message || 'Failed to process sale order.', 'error');
     }
   };
 
   const handleDeleteSale = async (id) => {
-    if (!window.confirm('Void and delete this contract record?')) return;
+    if (!window.confirm('Delete this sales invoice record?')) return;
     try {
       await api.deleteSale(id);
       setSales(prev => prev.filter(s => s.id !== id));
-      showToast('Contract record deleted.');
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to delete sale', 'error');
+      showToast('Sale record deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete sale record.', 'error');
     }
   };
 
-  // ================= TEST DRIVE HANDLERS =================
-  const handleSaveTestDrive = async (tdData) => {
+  // Enquiries
+  const handleSaveEnquiry = async (data) => {
     try {
-      const created = await api.createTestDrive(tdData);
-      setTestdrives(prev => [created, ...prev]);
-      showToast(`Test Drive scheduled for ${created.customerName}.`);
-      refreshDashboard();
+      if (editingEnquiry) {
+        const updated = await api.updateEnquiry(editingEnquiry.id, data);
+        setEnquiries(prev => prev.map(e => e.id === editingEnquiry.id ? updated : e));
+        showToast('Enquiry updated.');
+      } else {
+        const created = await api.createEnquiry(data);
+        setEnquiries(prev => [created, ...prev]);
+        showToast('New lead added to sales pipeline.');
+      }
+      setIsEnquiryModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save enquiry.', 'error');
+    }
+  };
+
+  const handleDeleteEnquiry = async (id) => {
+    if (!window.confirm('Delete this enquiry lead?')) return;
+    try {
+      await api.deleteEnquiry(id);
+      setEnquiries(prev => prev.filter(e => e.id !== id));
+      showToast('Enquiry lead deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete enquiry.', 'error');
+    }
+  };
+
+  // Workflow Conversion: Lead -> Customer
+  const handleConvertLeadToCustomer = async (lead) => {
+    try {
+      await api.convertLeadToCustomer(lead.id);
+      showToast(`Lead ${lead.contact_name || lead.customerName} successfully converted to registered customer!`);
+      await loadAllData();
+      setActiveTab('customers');
     } catch (err) {
-      showToast('Failed to book test drive', 'error');
+      showToast(err.message || 'Failed to convert lead to customer.', 'error');
+    }
+  };
+
+  // Estimates (Workflow Step: Test Drive -> Estimate -> Quotation)
+  const handleSaveEstimate = async (data) => {
+    try {
+      if (editingEstimate) {
+        const updated = await api.updateEstimate(editingEstimate.id, data);
+        setEstimates(prev => prev.map(e => e.id === editingEstimate.id ? updated : e));
+        showToast(`Estimate #${updated.estimateNo || updated.estimate_number || updated.id} updated.`);
+      } else {
+        const created = await api.createEstimate(data);
+        setEstimates(prev => [created, ...prev]);
+        showToast(`Estimate #${created.estimateNo || created.estimate_number || created.id} generated!`);
+      }
+      setIsEstimateModalOpen(false);
+      loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to save vehicle estimate.', 'error');
+    }
+  };
+
+  const handleDeleteEstimate = async (id) => {
+    if (!window.confirm('Delete this price estimate?')) return;
+    try {
+      await api.deleteEstimate(id);
+      setEstimates(prev => prev.filter(e => e.id !== id));
+      showToast('Estimate record removed.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete estimate.', 'error');
+    }
+  };
+
+  const handleConvertEstimateToQuotation = async (est) => {
+    try {
+      const res = await api.convertEstimateToQuotation(est.id);
+      showToast(`Estimate converted into official Quotation #${res.quotation?.quotation_number || 'New'}!`);
+      await loadAllData();
+      setActiveTab('quotations');
+    } catch (err) {
+      showToast(err.message || 'Failed to convert estimate to quotation.', 'error');
+    }
+  };
+
+  // Workflow Conversion: Quotation -> EMI / Finance
+  const handleApplyFinanceFromQuotation = (quot) => {
+    const matchedVehicle = vehicles.find(v => v.id === (quot.vehicleId || quot.vehicle_id));
+    const price = Number(quot.totalAmount || quot.total || quot.exShowroomPrice || 1500000);
+    setFinanceInitialData({
+      quotationNo: quot.quotationNo || quot.quotation_number,
+      vehicleId: quot.vehicleId || quot.vehicle_id || matchedVehicle?.id,
+      vehicleName: quot.vehicleName || quot.vehicle_name,
+      customerId: quot.customerId || quot.customer_id,
+      customerName: quot.customerName || quot.customer_name,
+      totalAmount: price,
+      vehiclePrice: price
+    });
+    setActiveTab('finance');
+    showToast(`Transferred Quotation #${quot.quotationNo || quot.quotation_number} to EMI & Loan Calculator.`);
+  };
+
+  const handleApplyLoanFromCalculator = async (loanData) => {
+    try {
+      await handleAddFinanceApp(loanData);
+      setActiveTab('finance-apps');
+    } catch {
+      showToast('Failed to submit loan application.', 'error');
+    }
+  };
+
+  // Quotations
+  const handleSaveQuotation = async (data) => {
+    try {
+      if (editingQuotation) {
+        const updated = await api.updateQuotation(editingQuotation.id, data);
+        setQuotations(prev => prev.map(q => q.id === editingQuotation.id ? updated : q));
+        showToast('Quotation updated.');
+      } else {
+        const created = await api.createQuotation(data);
+        setQuotations(prev => [created, ...prev]);
+        showToast(`Quotation #${created.quotationNo} generated.`);
+      }
+      setIsQuotationModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save quotation.', 'error');
+    }
+  };
+
+  const handleDeleteQuotation = async (id) => {
+    if (!window.confirm('Delete this quotation?')) return;
+    try {
+      await api.deleteQuotation(id);
+      setQuotations(prev => prev.filter(q => q.id !== id));
+      showToast('Quotation deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete quotation.', 'error');
+    }
+  };
+
+  const handleConvertToSale = (quot) => {
+    setIsQuotationViewOpen(false);
+    const matchedVehicle = vehicles.find(v => v.id === (quot.vehicleId || quot.vehicle_id));
+    setPreselectedVehicleForSale({
+      quotationId: quot.id,
+      id: quot.vehicleId || quot.vehicle_id || matchedVehicle?.id,
+      brand: quot.vehicleName ? quot.vehicleName.split(' ')[0] : (matchedVehicle?.brand || 'Vehicle'),
+      model: quot.vehicleName ? quot.vehicleName.slice(quot.vehicleName.indexOf(' ') + 1) : (matchedVehicle?.model || ''),
+      price: quot.exShowroomPrice || quot.ex_showroom_price || matchedVehicle?.price,
+      customerName: quot.customerName || quot.customer_name,
+      customerId: quot.customerId || quot.customer_id
+    });
+    setIsSaleModalOpen(true);
+    showToast(`Quotation #${quot.quotationNo || quot.quotation_number} ready for vehicle sale agreement.`);
+  };
+
+  // Test Drives
+  const handleSaveTestDrive = async (data) => {
+    try {
+      const created = await api.createTestDrive(data);
+      setTestdrives(prev => [created, ...prev]);
+      showToast(`Test drive confirmed for ${created.customerName}.`);
+      setIsTestDriveModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to schedule test drive.', 'error');
     }
   };
 
   const handleUpdateTestDriveStatus = async (id, status) => {
     try {
       const updated = await api.updateTestDrive(id, { status });
-      setTestdrives(prev => prev.map(t => t.id === id ? updated : t));
-      showToast(`Drive status set to "${status}".`);
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to update drive status', 'error');
+      setTestdrives(prev => prev.map(td => td.id === id ? updated : td));
+      showToast(`Test drive status updated to ${status}.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update test drive.', 'error');
     }
   };
 
   const handleDeleteTestDrive = async (id) => {
+    if (!window.confirm('Delete this test drive booking?')) return;
     try {
       await api.deleteTestDrive(id);
       setTestdrives(prev => prev.filter(t => t.id !== id));
-      showToast('Test drive cancelled.');
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to delete drive', 'error');
+      showToast('Test drive record removed.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete test drive.', 'error');
     }
   };
 
-  // ================= SERVICE HANDLERS =================
-  const handleSaveService = async (srvData) => {
+  // PDI Handover (NEW)
+  const handleAddPDI = async (data) => {
     try {
-      const created = await api.createService(srvData);
+      const created = await api.createPDI(data);
+      setPdiList(prev => [created, ...prev]);
+      showToast(`PDI Inspection ${created.pdiNo} recorded.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to create PDI inspection.', 'error');
+    }
+  };
+
+  const handleUpdatePDI = async (id, data) => {
+    try {
+      const updated = await api.updatePDI(id, data);
+      setPdiList(prev => prev.map(p => p.id === id ? updated : p));
+      showToast(`PDI Certificate ${updated.pdiNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update PDI inspection.', 'error');
+    }
+  };
+
+  // Trade-Ins (NEW)
+  const handleAddTradeIn = async (data) => {
+    try {
+      const created = await api.createTradeIn(data);
+      setTradeIns(prev => [created, ...prev]);
+      showToast(`Exchange Assessment ${created.exchangeNo} logged.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to record trade-in.', 'error');
+    }
+  };
+
+  const handleUpdateTradeIn = async (id, data) => {
+    try {
+      const updated = await api.updateTradeIn(id, data);
+      setTradeIns(prev => prev.map(t => t.id === id ? updated : t));
+      showToast(`Exchange Assessment ${updated.exchangeNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update trade-in.', 'error');
+    }
+  };
+
+  // Finance Applications (NEW)
+  const handleAddFinanceApp = async (data) => {
+    try {
+      const created = await api.createFinanceApp(data);
+      setFinanceApps(prev => [created, ...prev]);
+      showToast(`Bank loan application ${created.applicationNo} submitted.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to submit finance application.', 'error');
+    }
+  };
+
+  const handleUpdateFinanceApp = async (id, data) => {
+    try {
+      const updated = await api.updateFinanceApp(id, data);
+      setFinanceApps(prev => prev.map(f => f.id === id ? updated : f));
+      showToast(`Loan application ${updated.applicationNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update finance file.', 'error');
+    }
+  };
+
+  // Insurance (NEW)
+  const handleAddInsurance = async (data) => {
+    try {
+      const created = await api.createInsurance(data);
+      setInsurance(prev => [created, ...prev]);
+      showToast(`Insurance policy ${created.policyNo} registered.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to register insurance policy.', 'error');
+    }
+  };
+
+  const handleUpdateInsurance = async (id, data) => {
+    try {
+      const updated = await api.updateInsurance(id, data);
+      setInsurance(prev => prev.map(i => i.id === id ? updated : i));
+      showToast(`Insurance policy ${updated.policyNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update insurance policy.', 'error');
+    }
+  };
+
+  // Warranties (NEW)
+  const handleAddWarranty = async (data) => {
+    try {
+      const created = await api.createWarranty(data);
+      setWarranties(prev => [created, ...prev]);
+      showToast(`Warranty plan ${created.warrantyNo} enrolled.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to enroll warranty.', 'error');
+    }
+  };
+
+  const handleUpdateWarranty = async (id, data) => {
+    try {
+      const updated = await api.updateWarranty(id, data);
+      setWarranties(prev => prev.map(w => w.id === id ? updated : w));
+      showToast(`Warranty plan ${updated.warrantyNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update warranty plan.', 'error');
+    }
+  };
+
+  // Service Bay Appointments (NEW)
+  const handleAddAppointment = async (data) => {
+    try {
+      const created = await api.createAppointment(data);
+      setAppointments(prev => [created, ...prev]);
+      showToast(`Workshop appointment ${created.appointmentNo} booked.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to book appointment.', 'error');
+    }
+  };
+
+  const handleUpdateAppointment = async (id, data) => {
+    try {
+      const updated = await api.updateAppointment(id, data);
+      setAppointments(prev => prev.map(a => a.id === id ? updated : a));
+      showToast(`Appointment ${updated.appointmentNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update appointment.', 'error');
+    }
+  };
+
+  const handleConvertToService = (appt) => {
+    setIsServiceModalOpen(true);
+  };
+
+  // Service Job Cards
+  const handleSaveService = async (data) => {
+    try {
+      const created = await api.createService(data);
       setServices(prev => [created, ...prev]);
-      showToast(`Workshop ticket ${created.ticketNo} generated.`);
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to open workshop ticket', 'error');
+      showToast(`Job Card #${created.ticketNo} generated.`);
+      setIsServiceModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to open job card.', 'error');
     }
   };
 
@@ -317,159 +748,53 @@ export default function App() {
     try {
       const updated = await api.updateService(id, { status });
       setServices(prev => prev.map(s => s.id === id ? updated : s));
-      showToast(`Service ticket status updated to "${status}".`);
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to update service ticket', 'error');
+      showToast(`Service ticket status updated to ${status}.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update service ticket.', 'error');
     }
   };
 
   const handleDeleteService = async (id) => {
+    if (!window.confirm('Delete this service job card?')) return;
     try {
       await api.deleteService(id);
       setServices(prev => prev.filter(s => s.id !== id));
-      showToast('Service ticket removed.');
-      refreshDashboard();
-    } catch (err) {
-      showToast('Failed to delete service ticket', 'error');
+      showToast('Service ticket deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete service ticket.', 'error');
     }
   };
 
-  // ================= STAFF HANDLERS =================
-  const handleSaveStaff = async (staffData) => {
+  const handleAllocateServiceParts = async (jobCardId, partsList) => {
     try {
-      if (editingStaff) {
-        const updated = await api.updateStaff(editingStaff.id, staffData);
-        setStaff(prev => prev.map(s => s.id === editingStaff.id ? updated : s));
-        showToast(`Staff member "${updated.name}" updated.`);
-      } else {
-        const created = await api.createStaff(staffData);
-        setStaff(prev => [created, ...prev]);
-        showToast(`Team member "${created.name}" registered.`);
-      }
+      const res = await api.allocateJobCardParts(jobCardId, partsList);
+      showToast(res.message || `Allocated genuine components to Job Card ${res.jobCardNumber || ''}. Stock deducted!`);
+      await loadAllData();
+      return res;
     } catch (err) {
-      showToast('Failed to save staff member', 'error');
+      showToast(err.message || 'Failed to allocate spare parts.', 'error');
+      throw err;
     }
   };
 
-  const handleDeleteStaff = async (id) => {
-    if (!window.confirm('Remove staff credential?')) return;
-    try {
-      await api.deleteStaff(id);
-      setStaff(prev => prev.filter(s => s.id !== id));
-      showToast('Staff member removed.');
-    } catch (err) {
-      showToast('Failed to delete staff member', 'error');
-    }
-  };
-
-  // ================= SETTINGS HANDLERS =================
-  const handleSaveSettings = async (settingsData) => {
-    try {
-      const updated = await api.updateSettings(settingsData);
-      setSettings(updated);
-      showToast('Showroom settings updated.');
-    } catch (err) {
-      showToast('Failed to save settings', 'error');
-    }
-  };
-
-  // ================= ENQUIRY HANDLERS =================
-  const handleSaveEnquiry = async (data) => {
-    try {
-      if (editingEnquiry) {
-        const updated = await api.updateEnquiry(editingEnquiry.id, data);
-        setEnquiries(prev => prev.map(e => e.id === editingEnquiry.id ? updated : e));
-        showToast(`Enquiry for "${updated.customerName}" updated.`);
-      } else {
-        const created = await api.createEnquiry(data);
-        setEnquiries(prev => [created, ...prev]);
-        showToast(`New lead from "${created.customerName}" recorded.`);
-      }
-    } catch (err) {
-      showToast('Failed to save enquiry', 'error');
-    }
-  };
-
-  const handleDeleteEnquiry = async (id) => {
-    if (!window.confirm('Delete this enquiry?')) return;
-    try {
-      await api.deleteEnquiry(id);
-      setEnquiries(prev => prev.filter(e => e.id !== id));
-      showToast('Enquiry removed.');
-    } catch (err) {
-      showToast('Failed to delete enquiry', 'error');
-    }
-  };
-
-  // ================= QUOTATION HANDLERS =================
-  const handleSaveQuotation = async (quotData) => {
-    try {
-      if (editingQuotation) {
-        const updated = await api.updateQuotation(editingQuotation.id, quotData);
-        setQuotations(prev => prev.map(q => q.id === editingQuotation.id ? updated : q));
-        showToast(`Quotation ${updated.quotationNo} updated.`);
-      } else {
-        const created = await api.createQuotation(quotData);
-        setQuotations(prev => [created, ...prev]);
-        showToast(`Pro-Forma Quotation ${created.quotationNo} generated.`);
-        setSelectedQuotation(created);
-        setIsQuotationViewOpen(true);
-      }
-    } catch (err) {
-      showToast('Failed to save quotation', 'error');
-    }
-  };
-
-  const handleDeleteQuotation = async (id) => {
-    if (!window.confirm('Delete this pro-forma quotation?')) return;
-    try {
-      await api.deleteQuotation(id);
-      setQuotations(prev => prev.filter(q => q.id !== id));
-      showToast('Quotation deleted.');
-    } catch (err) {
-      showToast('Failed to delete quotation', 'error');
-    }
-  };
-
-  const handleConvertToSale = (quot) => {
-    setIsQuotationViewOpen(false);
-    // Find matching vehicle
-    const matchedVeh = vehicles.find(v => v.id === quot.vehicleId) || {
-      id: quot.vehicleId || 'custom',
-      brand: quot.vehicleName ? quot.vehicleName.split(' ')[0] : 'Vehicle',
-      model: quot.vehicleName || 'Custom Model',
-      price: quot.exShowroomPrice || quot.totalAmount
-    };
-    setPreselectedVehicleForSale(matchedVeh);
-    setIsSaleModalOpen(true);
-  };
-
-  // ================= SPARE PARTS HANDLERS =================
-  const handleSavePart = async (partData) => {
+  // Spare Parts
+  const handleSavePart = async (data) => {
     try {
       if (editingPart) {
-        const updated = await api.updatePart(editingPart.id, partData);
+        const updated = await api.updatePart(editingPart.id, data);
         setParts(prev => prev.map(p => p.id === editingPart.id ? updated : p));
-        showToast(`Part "${updated.name}" updated.`);
+        showToast(`Spare part ${data.name} updated.`);
       } else {
-        const created = await api.createPart(partData);
+        const created = await api.createPart(data);
         setParts(prev => [created, ...prev]);
-        showToast(`Spare part "${created.name}" added to inventory.`);
+        showToast(`Spare part ${data.name} added to stock.`);
       }
-    } catch (err) {
-      showToast('Failed to save spare part', 'error');
-    }
-  };
-
-  const handleDeletePart = async (id) => {
-    if (!window.confirm('Delete this spare part from catalog?')) return;
-    try {
-      await api.deletePart(id);
-      setParts(prev => prev.filter(p => p.id !== id));
-      showToast('Spare part deleted.');
-    } catch (err) {
-      showToast('Failed to delete part', 'error');
+      setIsPartModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save part.', 'error');
     }
   };
 
@@ -477,259 +802,422 @@ export default function App() {
     try {
       const updated = await api.updatePart(id, { stock: newStock });
       setParts(prev => prev.map(p => p.id === id ? updated : p));
-      showToast(`Stock for ${updated.partNo} set to ${updated.stock}.`);
-    } catch (err) {
-      showToast('Failed to adjust stock', 'error');
+      showToast('Part stock quantity updated.');
+      loadAllData();
+    } catch {
+      showToast('Failed to update stock.', 'error');
     }
   };
 
-  // ================= VEHICLE PROCUREMENT HANDLERS =================
-  const handleSaveProcurement = async (orderData) => {
+  const handleDeletePart = async (id) => {
+    if (!window.confirm('Delete this spare part entry?')) return;
+    try {
+      await api.deletePart(id);
+      setParts(prev => prev.filter(p => p.id !== id));
+      showToast('Spare part deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete part.', 'error');
+    }
+  };
+
+  // Procurement (Connected Workflow)
+  const handleSaveProcurement = async (data) => {
     try {
       if (editingProcurement) {
-        const updated = await api.updateProcurement(editingProcurement.id, orderData);
-        setProcurement(prev => prev.map(o => o.id === editingProcurement.id ? updated : o));
-        showToast(`Factory Order ${updated.poNumber} updated.`);
+        const updated = await api.updateProcurement(editingProcurement.id, data);
+        setProcurement(prev => prev.map(p => p.id === editingProcurement.id ? updated : p));
+        showToast('Factory order updated.');
       } else {
-        const created = await api.createProcurement(orderData);
+        const created = await api.createProcurement(data);
         setProcurement(prev => [created, ...prev]);
-        showToast(`Factory Purchase Order ${created.poNumber} issued.`);
+        showToast(`Factory Purchase Order #${created.poNumber} placed.`);
       }
-    } catch (err) {
-      showToast('Failed to save procurement order', 'error');
+      setIsProcurementModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save procurement order.', 'error');
     }
   };
 
-  const handleDeleteProcurement = async (id) => {
-    if (!window.confirm('Cancel / delete this procurement order?')) return;
+  const handleUpdateProcurementStatus = async (id, status) => {
     try {
-      await api.deleteProcurement(id);
-      setProcurement(prev => prev.filter(o => o.id !== id));
-      showToast('Purchase order deleted.');
-    } catch (err) {
-      showToast('Failed to delete procurement order', 'error');
-    }
-  };
-
-  const handleUpdateProcurementStatus = async (id, nextStatus) => {
-    try {
-      const updated = await api.updateProcurement(id, { status: nextStatus });
-      setProcurement(prev => prev.map(o => o.id === id ? updated : o));
-      showToast(`Order ${updated.poNumber} status updated to "${nextStatus}".`);
-    } catch (err) {
-      showToast('Failed to update status', 'error');
+      const updated = await api.updateProcurement(id, { status });
+      setProcurement(prev => prev.map(p => p.id === id ? updated : p));
+      showToast(`Order status updated to ${status}. Auto-inventory synchronized.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update PO status.', 'error');
     }
   };
 
   const handleProcurementAddToInventory = async (order) => {
     try {
-      const newVeh = await api.createVehicle({
-        brand: order.brand,
-        model: order.model,
-        year: order.year || 2026,
-        price: order.suggestedRetailPrice || Math.round(Number(order.purchaseCost) * 1.15),
-        category: order.category || 'Supercar',
-        status: 'Available',
-        stock: 1,
-        color: order.exteriorColor || 'Guards Red',
-        vin: order.vin,
-        features: ['Factory Direct', 'Weissach Package', 'PDI Inspected']
+      const res = await api.receiveProcurementOrder(order.id, {
+        suggestedRetailPrice: order.suggestedRetailPrice || order.suggested_retail_price
       });
-      setVehicles(prev => [newVeh, ...prev]);
-      showToast(`Vehicle "${order.brand} ${order.model}" added to live showroom fleet!`);
-      refreshDashboard();
+      showToast(res.message || `Vehicle ${order.brand} ${order.model} intake complete! Added to live inventory.`);
+      await loadAllData();
     } catch (err) {
-      showToast('Failed to add vehicle to showroom', 'error');
+      showToast(err.message || 'Failed to receive vehicle into inventory.', 'error');
     }
   };
 
-  // Compute live notifications for Header
-  const alerts = useMemo(() => {
-    const result = [];
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Low stock vehicles
-    vehicles.filter(v => Number(v.stock) <= 1 && v.status === 'Available').forEach(v => {
-      result.push({ type: 'stock', title: 'Low Vehicle Stock', body: `${v.brand} ${v.model} — only 1 unit in showroom` });
-    });
+  const handleDeleteProcurement = async (id) => {
+    if (!window.confirm('Delete this purchase order?')) return;
+    try {
+      await api.deleteProcurement(id);
+      setProcurement(prev => prev.filter(p => p.id !== id));
+      showToast('Order record deleted.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete procurement order.', 'error');
+    }
+  };
 
-    // Low stock spare parts
-    parts.filter(p => Number(p.stock) <= Number(p.minStock || 3)).forEach(p => {
-      result.push({ type: 'stock', title: 'Spare Part Reorder', body: `${p.name} (${p.stock} units left)` });
-    });
+  // Vendors (NEW)
+  const handleAddVendor = async (data) => {
+    try {
+      const created = await api.createVendor(data);
+      setVendors(prev => [created, ...prev]);
+      showToast(`Vendor ${created.companyName} onboarded.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to onboard vendor.', 'error');
+    }
+  };
 
-    // Today's test drives
-    testdrives.filter(t => t.status === 'Scheduled' && t.date === today).forEach(t => {
-      result.push({ type: 'testdrive', title: 'Test Drive Today', body: `${t.customerName} — ${t.vehicleName} at ${t.timeSlot}` });
-    });
+  const handleUpdateVendor = async (id, data) => {
+    try {
+      const updated = await api.updateVendor(id, data);
+      setVendors(prev => prev.map(v => v.id === id ? updated : v));
+      showToast(`Vendor ${updated.companyName} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update vendor.', 'error');
+    }
+  };
 
-    // Pending services
-    services.filter(s => s.status === 'Pending').forEach(s => {
-      result.push({ type: 'service', title: 'Workshop Service', body: `Ticket ${s.ticketNo} — ${s.serviceType}` });
-    });
+  // Payments (NEW)
+  const handleAddPayment = async (data) => {
+    try {
+      const created = await api.createPayment(data);
+      setPayments(prev => [created, ...prev]);
+      showToast(`Payment receipt ${created.receiptNo || created.receipt_number} of ₹${Number(created.amount).toLocaleString('en-IN')} issued!`);
+      await loadAllData();
+      return created;
+    } catch (err) {
+      showToast(err.message || 'Failed to issue payment receipt.', 'error');
+      throw err;
+    }
+  };
 
-    return result;
-  }, [vehicles, parts, testdrives, services]);
+  const handleUpdatePayment = async (id, data) => {
+    try {
+      const updated = await api.updatePayment(id, data);
+      setPayments(prev => prev.map(p => p.id === id ? updated : p));
+      showToast(`Payment receipt ${updated.receiptNo} updated.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to update payment record.', 'error');
+    }
+  };
 
-  // If not logged in, render the login page!
+  // Feedback (NEW)
+  const handleAddFeedback = async (data) => {
+    try {
+      const created = await api.createFeedback(data);
+      setFeedback(prev => [created, ...prev]);
+      showToast(`Customer review (${created.ratingScore} Stars) recorded.`);
+      loadAllData();
+    } catch {
+      showToast('Failed to record feedback.', 'error');
+    }
+  };
+
+  const handleUpdateFeedback = async (id, data) => {
+    try {
+      const updated = await api.updateFeedback(id, data);
+      setFeedback(prev => prev.map(f => f.id === id ? updated : f));
+      showToast('Feedback survey updated.');
+      loadAllData();
+    } catch {
+      showToast('Failed to update feedback.', 'error');
+    }
+  };
+
+  // Staff
+  const handleSaveStaff = async (data) => {
+    try {
+      if (editingStaff) {
+        const updated = await api.updateStaff(editingStaff.id, data);
+        setStaff(prev => prev.map(s => s.id === editingStaff.id ? updated : s));
+        showToast(`Staff member ${data.name} updated.`);
+      } else {
+        const created = await api.createStaff(data);
+        setStaff(prev => [created, ...prev]);
+        showToast(`Staff member ${data.name} added.`);
+      }
+      setIsStaffModalOpen(false);
+      loadAllData();
+    } catch {
+      showToast('Failed to save staff.', 'error');
+    }
+  };
+
+  const handleDeleteStaff = async (id) => {
+    if (!window.confirm('Remove this staff member?')) return;
+    try {
+      await api.deleteStaff(id);
+      setStaff(prev => prev.filter(s => s.id !== id));
+      showToast('Staff member removed.');
+      loadAllData();
+    } catch {
+      showToast('Failed to delete staff member.', 'error');
+    }
+  };
+
+  // Payroll (Admin Only)
+  const handleAddPayroll = async (data) => {
+    try {
+      const created = await api.createPayroll(data);
+      setPayroll(prev => [created, ...prev]);
+      showToast(`Processed payroll for ${created.staff_name || 'staff'} (Net: ₹${Number(created.net_salary).toLocaleString('en-IN')})`);
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to create payroll record.', 'error');
+    }
+  };
+
+  const handleUpdatePayroll = async (id, data) => {
+    try {
+      const updated = await api.updatePayroll(id, data);
+      setPayroll(prev => prev.map(p => p.id === id ? updated : p));
+      showToast(`Payroll record ${updated.payroll_period} updated.`);
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to update payroll.', 'error');
+    }
+  };
+
+  const handleDeletePayroll = async (id) => {
+    try {
+      await api.deletePayroll(id);
+      setPayroll(prev => prev.filter(p => p.id !== id));
+      showToast('Payroll record deleted.');
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to delete payroll record.', 'error');
+    }
+  };
+
+  const handleGenerateBatchPayroll = async (data) => {
+    try {
+      const res = await api.generateBatchPayroll(data);
+      showToast(res.message || `Generated ${res.count || 0} batch payroll records.`);
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to generate batch payroll.', 'error');
+    }
+  };
+
+  // Expenses (Admin Only)
+  const handleAddExpense = async (data) => {
+    try {
+      const created = await api.createExpense(data);
+      setExpenses(prev => [created, ...prev]);
+      showToast(`Expense voucher ${created.expense_code} recorded (₹${Number(created.amount).toLocaleString('en-IN')})`);
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to record expense.', 'error');
+    }
+  };
+
+  const handleUpdateExpense = async (id, data) => {
+    try {
+      const updated = await api.updateExpense(id, data);
+      setExpenses(prev => prev.map(e => e.id === id ? updated : e));
+      showToast(`Expense voucher ${updated.expense_code} updated.`);
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to update expense.', 'error');
+    }
+  };
+
+  const handleDeleteExpense = async (id) => {
+    try {
+      await api.deleteExpense(id);
+      setExpenses(prev => prev.filter(e => e.id !== id));
+      showToast('Expense voucher deleted.');
+      await loadAllData();
+    } catch (err) {
+      showToast(err.message || 'Failed to delete expense.', 'error');
+    }
+  };
+
+  // Settings
+  const handleSaveSettings = async (data) => {
+    try {
+      const updated = await api.updateSettings(data);
+      setSettings(updated);
+      showToast('Showroom settings updated successfully.');
+      loadAllData();
+    } catch {
+      showToast('Failed to save settings.', 'error');
+    }
+  };
+
+  // Sidebar Counts
+  const counts = useMemo(() => ({
+    vehicles: vehicles.length,
+    customers: customers.length,
+    sales: sales.length,
+    testdrives: testdrives.length,
+    services: services.length,
+    staff: staff.length,
+    enquiries: enquiries.length,
+    estimates: estimates.length,
+    quotations: quotations.length,
+    parts: parts.length,
+    procurement: procurement.length,
+    pdi: pdiList.length,
+    tradeins: tradeIns.length,
+    financeApps: financeApps.length,
+    insurance: insurance.length,
+    warranties: warranties.length,
+    appointments: appointments.length,
+    vendors: vendors.length,
+    payments: payments.length,
+    feedback: feedback.length,
+    reminders: remindersCount,
+    communications: campaignsCount || 2
+  }), [vehicles, customers, sales, testdrives, services, staff, enquiries, estimates, quotations, parts, procurement, pdiList, tradeIns, financeApps, insurance, warranties, appointments, vendors, payments, feedback, remindersCount, campaignsCount]);
+
+  // If not logged in, show Login page
   if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
 
   return (
     <div className="app-shell">
-      
-      {/* Toast Alert Banner */}
+      {/* Toast Notification */}
       {toast && (
-        <div className="toast-notification" style={{
-          position: 'fixed',
-          top: '24px',
-          right: '32px',
-          zIndex: 2000,
-          background: toast.type === 'error' ? '#fef2f2' : '#ffffff',
-          color: toast.type === 'error' ? '#dc2626' : '#0f172a',
-          border: toast.type === 'error' ? '1px solid #fecaca' : '1px solid #e2e8f0',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-          padding: '12px 20px',
-          borderRadius: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          animation: 'slideUp 0.25s ease'
-        }}>
-          {toast.type === 'error' ? <AlertCircle size={18} color="#dc2626" /> : <CheckCircle2 size={18} color="#16a34a" />}
-          <span style={{ fontSize: '0.86rem', fontWeight: 600 }}>{toast.message}</span>
+        <div className={`toast toast-${toast.type} animate-slide-down`}>
+          {toast.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+          <span>{toast.message}</span>
         </div>
       )}
 
-      {/* Sidebar with Role Access & Mobile Off-canvas Drawer */}
+      {/* Sidebar with 23 Modules & Strict RBAC */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={(tab) => {
-          setActiveTab(tab);
-          setMobileMenuOpen(false);
-        }}
+        setActiveTab={setActiveTab}
+        counts={counts}
         currentUser={currentUser}
         onLogout={handleLogout}
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
-        counts={{
-          vehicles: vehicles.length,
-          customers: customers.length,
-          sales: sales.length,
-          enquiries: enquiries.filter(e => e.status === 'New' || e.status === 'Follow-up').length,
-          testdrives: testdrives.filter(t => t.status === 'Scheduled').length,
-          services: services.filter(s => s.status !== 'Completed').length,
-          quotations: quotations.filter(q => q.status === 'Sent' || q.status === 'Accepted').length,
-          parts: parts.filter(p => Number(p.stock) <= Number(p.minStock || 3)).length,
-          procurement: procurement.filter(o => o.status === 'In Transit').length
-        }}
       />
 
-      {/* Main Content Area */}
-      <div className="app-main">
+      <div className="app-main-wrapper">
         <Header 
           activeTab={activeTab}
+          setActiveTab={setActiveTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          settings={settings}
-          alerts={alerts}
           currentUser={currentUser}
           onLogout={handleLogout}
-          onNavigate={(tab) => {
-            setActiveTab(tab);
-            setMobileMenuOpen(false);
-          }}
-          vehicles={vehicles}
-          customers={customers}
-          quotations={quotations}
-          sales={sales}
-          onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)}
-          onQuickAction={() => {
-            setPreselectedVehicleForSale(null);
-            setIsSaleModalOpen(true);
-          }}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          lowStockCount={vehicles.filter(v => Number(v.stock) <= 1 && v.status === 'Available').length}
+          pendingTestDrivesCount={testdrives.filter(t => t.status === 'Scheduled').length}
+          openTicketsCount={services.filter(s => s.status !== 'Completed').length}
         />
 
-        <main className="main-content-layout" style={{ flex: 1, padding: 'clamp(14px, 2.5vw, 30px)', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
-          {loading ? (
-            <div style={{ padding: '80px 20px', textAlign: 'center', color: '#94a3b8' }}>
-              <div className="status-dot active" style={{ marginBottom: '14px', width: '12px', height: '12px' }}></div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>Syncing Apex Horizon Showroom Data...</div>
-              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>Loading inventory, quotes, parts, and deals</div>
+        <main className="app-main">
+          {loading && !dashboardData && vehicles.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '14px' }}>
+              <div className="spinner" />
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Connecting to Dealership SQLite Engine...</p>
             </div>
           ) : (
             <>
-              {/* Dashboard */}
+              {/* 1. Dashboard */}
               {activeTab === 'dashboard' && (
                 <Dashboard 
                   dashboardData={dashboardData}
-                  onNavigate={(tab) => setActiveTab(tab)}
-                  onViewInvoice={(sale) => {
-                    setSelectedInvoiceSale(sale);
-                    setIsInvoiceOpen(true);
-                  }}
-                  onOpenAddSale={() => {
-                    setPreselectedVehicleForSale(null);
-                    setIsSaleModalOpen(true);
-                  }}
-                  onOpenAddVehicle={() => {
-                    setEditingVehicle(null);
-                    setIsVehicleModalOpen(true);
-                  }}
-                  onOpenAddTestDrive={() => {
-                    setTestDriveInitialData(null);
-                    setIsTestDriveModalOpen(true);
-                  }}
+                  vehicles={vehicles}
+                  sales={sales}
+                  services={services}
+                  testdrives={testdrives}
+                  onNavigate={setActiveTab}
+                  onViewInvoice={(sale) => { setSelectedInvoiceSale(sale); setIsInvoiceOpen(true); }}
+                  onOpenAddSale={() => { setPreselectedVehicleForSale(null); setIsSaleModalOpen(true); }}
+                  onOpenAddVehicle={() => { setEditingVehicle(null); setIsVehicleModalOpen(true); }}
+                  onOpenAddQuotation={() => { setEditingQuotation(null); setIsQuotationModalOpen(true); }}
+                  onOpenAddTestDrive={() => { setTestDriveInitialData(null); setIsTestDriveModalOpen(true); }}
                   onOpenAddService={() => setIsServiceModalOpen(true)}
                 />
               )}
 
-              {/* Vehicles Inventory */}
+              {/* Reminders & Action Alerts */}
+              {activeTab === 'reminders' && (
+                <Reminders 
+                  currentUser={currentUser}
+                  onNavigate={setActiveTab}
+                />
+              )}
+
+              {/* Communication, Campaigns & Client Outreach */}
+              {(activeTab === 'communications' || activeTab === 'campaigns') && (
+                <Communications 
+                  currentUser={currentUser}
+                  customers={customers}
+                  sales={sales}
+                />
+              )}
+
+              {/* Documents Management */}
+              {activeTab === 'documents' && (
+                <Documents 
+                  customers={customers}
+                  vehicles={vehicles}
+                  sales={sales}
+                />
+              )}
+
+              {/* 2. Vehicles Inventory */}
               {activeTab === 'inventory' && (
                 <Inventory 
                   vehicles={vehicles}
-                  onAddVehicle={() => {
-                    setEditingVehicle(null);
-                    setIsVehicleModalOpen(true);
-                  }}
-                  onEditVehicle={(v) => {
-                    setEditingVehicle(v);
-                    setIsVehicleModalOpen(true);
-                  }}
+                  onAddVehicle={() => { setEditingVehicle(null); setIsVehicleModalOpen(true); }}
+                  onEditVehicle={(v) => { setEditingVehicle(v); setIsVehicleModalOpen(true); }}
                   onDeleteVehicle={handleDeleteVehicle}
-                  onSellVehicle={(v) => {
-                    setPreselectedVehicleForSale(v);
-                    setIsSaleModalOpen(true);
-                  }}
-                  onBookTestDrive={(v) => {
-                    setTestDriveInitialData(v);
-                    setIsTestDriveModalOpen(true);
-                  }}
+                  onSellVehicle={(v) => { setPreselectedVehicleForSale(v); setIsSaleModalOpen(true); }}
+                  onBookTestDrive={(v) => { setTestDriveInitialData({ vehicleName: `${v.brand} ${v.model}`, vehicleId: v.id }); setIsTestDriveModalOpen(true); }}
                 />
               )}
 
-              {/* Customers */}
+              {/* 3. Customers / CRM */}
               {activeTab === 'customers' && (
                 <Customers 
                   customers={customers}
-                  onAddCustomer={() => {
-                    setEditingCustomer(null);
-                    setIsCustomerModalOpen(true);
-                  }}
-                  onEditCustomer={(c) => {
-                    setEditingCustomer(c);
-                    setIsCustomerModalOpen(true);
-                  }}
+                  onAddCustomer={() => { setEditingCustomer(null); setIsCustomerModalOpen(true); }}
+                  onEditCustomer={(c) => { setEditingCustomer(c); setIsCustomerModalOpen(true); }}
                   onDeleteCustomer={handleDeleteCustomer}
-                  onBookTestDrive={(data) => {
-                    setTestDriveInitialData(data);
-                    setIsTestDriveModalOpen(true);
+                  onBookTestDrive={(data) => { setTestDriveInitialData(data); setIsTestDriveModalOpen(true); }}
+                  onNewEstimate={(cust) => {
+                    setEstimateInitialData({
+                      customerId: cust.customerId || cust.id,
+                      customerName: cust.customerName || cust.name,
+                      customerPhone: cust.customerPhone || cust.phone,
+                      vehicleInterest: cust.vehicleInterest
+                    });
+                    setIsEstimateModalOpen(true);
                   }}
                 />
               )}
 
-              {/* Enquiries & Leads */}
+              {/* 4. Enquiries & Leads */}
               {activeTab === 'enquiries' && (
                 <Enquiries
                   enquiries={enquiries}
@@ -738,144 +1226,335 @@ export default function App() {
                   onEditEnquiry={(e) => { setEditingEnquiry(e); setIsEnquiryModalOpen(true); }}
                   onDeleteEnquiry={handleDeleteEnquiry}
                   onConvertTestDrive={(enq) => {
-                    setTestDriveInitialData({ customerName: enq.customerName, vehicleName: enq.vehicleInterest });
+                    setTestDriveInitialData({
+                      customerName: enq.customerName,
+                      customerPhone: enq.phone,
+                      vehicleName: enq.vehicleInterest
+                    });
                     setIsTestDriveModalOpen(true);
                   }}
+                  onConvertCustomer={handleConvertLeadToCustomer}
                 />
               )}
 
-              {/* Quotations / Pro-Forma */}
+              {/* 5. Vehicle Cost Estimates & Pricing */}
+              {activeTab === 'estimates' && (
+                <Estimates
+                  estimates={estimates}
+                  onAddEstimate={() => { setEditingEstimate(null); setEstimateInitialData(null); setIsEstimateModalOpen(true); }}
+                  onEditEstimate={(est) => { setEditingEstimate(est); setIsEstimateModalOpen(true); }}
+                  onDeleteEstimate={handleDeleteEstimate}
+                  onConvertToQuotation={handleConvertEstimateToQuotation}
+                  onViewEstimate={(est) => { setSelectedEstimateForView(est); setIsEstimateViewOpen(true); }}
+                />
+              )}
+
+              {/* 6. Quotations / Pro-Forma */}
               {activeTab === 'quotations' && (
                 <Quotations
                   quotations={quotations}
-                  onAddQuotation={() => {
-                    setEditingQuotation(null);
-                    setIsQuotationModalOpen(true);
-                  }}
-                  onEditQuotation={(q) => {
-                    setEditingQuotation(q);
-                    setIsQuotationModalOpen(true);
-                  }}
+                  onAddQuotation={() => { setEditingQuotation(null); setIsQuotationModalOpen(true); }}
+                  onEditQuotation={(q) => { setEditingQuotation(q); setIsQuotationModalOpen(true); }}
                   onDeleteQuotation={handleDeleteQuotation}
-                  onViewQuotation={(q) => {
-                    setSelectedQuotation(q);
-                    setIsQuotationViewOpen(true);
-                  }}
+                  onViewQuotation={(q) => { setSelectedQuotation(q); setIsQuotationViewOpen(true); }}
                   onConvertToSale={handleConvertToSale}
+                  onApplyFinance={handleApplyFinanceFromQuotation}
                 />
               )}
 
-              {/* Sales & Invoices */}
+              {/* 7. Sales & Invoices */}
               {activeTab === 'sales' && (
                 <Sales 
                   sales={sales}
-                  onAddSale={() => {
-                    setPreselectedVehicleForSale(null);
-                    setIsSaleModalOpen(true);
-                  }}
+                  onAddSale={() => { setPreselectedVehicleForSale(null); setIsSaleModalOpen(true); }}
                   onDeleteSale={handleDeleteSale}
-                  onViewInvoice={(sale) => {
-                    setSelectedInvoiceSale(sale);
-                    setIsInvoiceOpen(true);
-                  }}
+                  onViewInvoice={(sale) => { setSelectedInvoiceSale(sale); setIsInvoiceOpen(true); }}
+                  onRecordPayment={handleTriggerPayment}
                 />
               )}
 
-              {/* Test Drives */}
+              {/* 8. Test Drives */}
               {activeTab === 'testdrives' && (
                 <TestDrives 
                   testdrives={testdrives}
-                  onAddTestDrive={() => {
-                    setTestDriveInitialData(null);
-                    setIsTestDriveModalOpen(true);
-                  }}
+                  onAddTestDrive={() => { setTestDriveInitialData(null); setIsTestDriveModalOpen(true); }}
                   onUpdateStatus={handleUpdateTestDriveStatus}
                   onDeleteTestDrive={handleDeleteTestDrive}
+                  onCreateEstimate={(td) => {
+                    setEstimateInitialData({
+                      customerName: td.customerName,
+                      customerPhone: td.customerPhone,
+                      vehicleName: td.vehicleName,
+                      vehicleId: td.vehicle_id || td.vehicleId
+                    });
+                    setIsEstimateModalOpen(true);
+                  }}
                 />
               )}
 
-              {/* Spare Parts Inventory (Admin Only) */}
-              {activeTab === 'parts' && currentUser?.role === 'admin' && (
+              {/* 9. PDI Handover (NEW) */}
+              {activeTab === 'pdi' && (
+                <PDI 
+                  pdiList={pdiList}
+                  sales={sales}
+                  onAddPDI={handleAddPDI}
+                  onUpdatePDI={handleUpdatePDI}
+                />
+              )}
+
+              {/* 10. Used Car Trade-Ins (NEW) */}
+              {activeTab === 'tradeins' && (
+                <TradeIns 
+                  tradeIns={tradeIns}
+                  sales={sales}
+                  onAddTradeIn={handleAddTradeIn}
+                  onUpdateTradeIn={handleUpdateTradeIn}
+                />
+              )}
+
+              {/* 11. EMI Calculator */}
+              {activeTab === 'finance' && (
+                <Finance 
+                  initialData={financeInitialData}
+                  onApplyLoan={handleApplyLoanFromCalculator}
+                />
+              )}
+
+              {/* 12. Bank Loan Files (NEW) */}
+              {activeTab === 'finance-apps' && (
+                <FinanceApps 
+                  financeApps={financeApps}
+                  customers={customers}
+                  vehicles={vehicles}
+                  onAddFinanceApp={handleAddFinanceApp}
+                  onUpdateFinanceApp={handleUpdateFinanceApp}
+                />
+              )}
+
+              {/* 12. Insurance Policies (NEW) */}
+              {activeTab === 'insurance' && (
+                <Insurance 
+                  insurance={insurance}
+                  vehicles={vehicles}
+                  customers={customers}
+                  onAddInsurance={handleAddInsurance}
+                  onUpdateInsurance={handleUpdateInsurance}
+                />
+              )}
+
+              {/* 13. Warranties (NEW) */}
+              {activeTab === 'warranties' && (
+                <Warranties 
+                  warranties={warranties}
+                  vehicles={vehicles}
+                  customers={customers}
+                  onAddWarranty={handleAddWarranty}
+                  onUpdateWarranty={handleUpdateWarranty}
+                />
+              )}
+
+              {/* 14. Payment Receipts (NEW) */}
+              {activeTab === 'payments' && (
+                <Payments 
+                  payments={payments}
+                  sales={sales}
+                  settings={settings}
+                  onAddPayment={handleAddPayment}
+                  onUpdatePayment={handleUpdatePayment}
+                  initialPaymentData={initialPaymentData}
+                  onClearInitialPaymentData={() => setInitialPaymentData(null)}
+                />
+              )}
+
+              {/* 15. Workshop & Job Cards (Admin Only) */}
+              {activeTab === 'service' && isAdmin && (
+                <Service 
+                  services={services}
+                  parts={parts}
+                  customers={customers}
+                  vehicles={vehicles}
+                  onAddService={() => setIsServiceModalOpen(true)}
+                  onUpdateStatus={handleUpdateServiceStatus}
+                  onDeleteService={handleDeleteService}
+                  onAllocateParts={handleAllocateServiceParts}
+                />
+              )}
+
+              {/* 16. Service Bay Appointments (NEW) */}
+              {activeTab === 'appointments' && (
+                <Appointments 
+                  appointments={appointments}
+                  onAddAppointment={handleAddAppointment}
+                  onUpdateAppointment={handleUpdateAppointment}
+                  onConvertToService={handleConvertToService}
+                />
+              )}
+
+              {/* 17. Spare Parts (Admin Only) */}
+              {activeTab === 'parts' && isAdmin && (
                 <Parts
                   parts={parts}
-                  onAddPart={() => {
-                    setEditingPart(null);
-                    setIsPartModalOpen(true);
-                  }}
-                  onEditPart={(p) => {
-                    setEditingPart(p);
-                    setIsPartModalOpen(true);
-                  }}
+                  onAddPart={() => { setEditingPart(null); setIsPartModalOpen(true); }}
+                  onEditPart={(p) => { setEditingPart(p); setIsPartModalOpen(true); }}
                   onDeletePart={handleDeletePart}
                   onUpdateStock={handleUpdatePartStock}
                 />
               )}
 
-              {/* Vehicle Procurement / Factory Orders (Admin Only) */}
-              {activeTab === 'procurement' && currentUser?.role === 'admin' && (
+              {/* 18. OEM Procurement (Admin Only) */}
+              {activeTab === 'procurement' && isAdmin && (
                 <Procurement
                   procurement={procurement}
-                  onAddOrder={() => {
-                    setEditingProcurement(null);
-                    setIsProcurementModalOpen(true);
-                  }}
-                  onEditOrder={(o) => {
-                    setEditingProcurement(o);
-                    setIsProcurementModalOpen(true);
-                  }}
+                  onAddOrder={() => { setEditingProcurement(null); setIsProcurementModalOpen(true); }}
+                  onEditOrder={(o) => { setEditingProcurement(o); setIsProcurementModalOpen(true); }}
                   onDeleteOrder={handleDeleteProcurement}
                   onUpdateStatus={handleUpdateProcurementStatus}
                   onAddToInventory={handleProcurementAddToInventory}
                 />
               )}
 
-              {/* Service Center (Admin Only) */}
-              {activeTab === 'service' && currentUser?.role === 'admin' && (
-                <Service 
-                  services={services}
-                  onAddService={() => setIsServiceModalOpen(true)}
-                  onUpdateStatus={handleUpdateServiceStatus}
-                  onDeleteService={handleDeleteService}
+              {/* 19. Suppliers & Vendors (NEW - Admin Only) */}
+              {activeTab === 'vendors' && isAdmin && (
+                <Vendors 
+                  vendors={vendors}
+                  onAddVendor={handleAddVendor}
+                  onUpdateVendor={handleUpdateVendor}
                 />
               )}
 
-              {/* Staff Management (Admin Only) */}
-              {activeTab === 'staff' && currentUser?.role === 'admin' && (
+              {/* 20. Staff Management (Admin Only) */}
+              {activeTab === 'staff' && isAdmin && (
                 <Staff 
                   staff={staff}
-                  onAddStaff={() => {
-                    setEditingStaff(null);
-                    setIsStaffModalOpen(true);
-                  }}
-                  onEditStaff={(member) => {
-                    setEditingStaff(member);
-                    setIsStaffModalOpen(true);
-                  }}
+                  onAddStaff={() => { setEditingStaff(null); setIsStaffModalOpen(true); }}
+                  onEditStaff={(member) => { setEditingStaff(member); setIsStaffModalOpen(true); }}
                   onDeleteStaff={handleDeleteStaff}
                 />
               )}
 
-              {/* Financial Reports (Admin Only) */}
-              {activeTab === 'reports' && currentUser?.role === 'admin' && (
-                <Reports 
-                  dashboardData={dashboardData}
-                  sales={sales}
-                  vehicles={vehicles}
+              {/* Staff Payroll Ledger (Admin Only) */}
+              {activeTab === 'payroll' && isAdmin && (
+                <Payroll 
+                  payroll={payroll}
+                  staff={staff}
+                  settings={settings}
+                  onAddPayroll={handleAddPayroll}
+                  onUpdatePayroll={handleUpdatePayroll}
+                  onDeletePayroll={handleDeletePayroll}
+                  onGenerateBatch={handleGenerateBatchPayroll}
                 />
               )}
 
-              {/* Settings (Admin Only) */}
-              {activeTab === 'settings' && currentUser?.role === 'admin' && (
+              {/* Showroom Operational Expenses (Admin Only) */}
+              {activeTab === 'expenses' && isAdmin && (
+                <Expenses 
+                  expenses={expenses}
+                  onAddExpense={handleAddExpense}
+                  onUpdateExpense={handleUpdateExpense}
+                  onDeleteExpense={handleDeleteExpense}
+                  onNavigateToReports={() => setActiveTab('reports')}
+                />
+              )}
+
+              {/* 21. Customer Feedback & CSAT (NEW) */}
+              {activeTab === 'feedback' && (
+                <Feedback 
+                  feedback={feedback}
+                  onAddFeedback={handleAddFeedback}
+                  onUpdateFeedback={handleUpdateFeedback}
+                />
+              )}
+
+              {/* 22. Financial Reports & Accounts Suite */}
+              {activeTab === 'reports' && (
+                <Reports 
+                  currentUser={currentUser}
+                  dashboardData={dashboardData}
+                  sales={sales}
+                  vehicles={vehicles}
+                  settings={settings}
+                />
+              )}
+
+              {/* 23. Audit Trail Logs (NEW - Admin Only) */}
+              {activeTab === 'auditlogs' && isAdmin && (
+                <AuditLogs 
+                  auditLogs={auditLogs}
+                />
+              )}
+
+              {/* Backup & System Maintenance (Admin Only) */}
+              {activeTab === 'backup' && isAdmin && (
+                <Backup />
+              )}
+
+              {/* 24. Showroom Settings (Admin Only) */}
+              {activeTab === 'settings' && isAdmin && (
                 <Settings 
                   settings={settings}
                   onSaveSettings={handleSaveSettings}
                 />
               )}
 
-              {/* EMI Calculator */}
-              {activeTab === 'finance' && <Finance />}
+              {/* Protected Route Guard: Access Denied for unauthorized roles */}
+              {!isAdmin && ['parts', 'procurement', 'vendors', 'staff', 'auditlogs', 'settings', 'payroll', 'expenses', 'service', 'backup'].includes(activeTab) && (
+                <div style={{
+                  background: '#131823',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '16px',
+                  padding: '48px 24px',
+                  textAlign: 'center',
+                  maxWidth: '540px',
+                  margin: '40px auto'
+                }}>
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 20px',
+                    color: '#ef4444'
+                  }}>
+                    <AlertCircle size={36} />
+                  </div>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                    Access Denied
+                  </h2>
+                  <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.5 }}>
+                    This module is restricted to <strong>ADMIN</strong> authority. Your current role is <strong>SALES_EXECUTIVE</strong>.
+                  </p>
+                  <button 
+                    onClick={() => setActiveTab('dashboard')} 
+                    className="btn btn-primary"
+                    style={{ padding: '10px 24px', borderRadius: '8px' }}
+                  >
+                    Return to Dashboard
+                  </button>
+                </div>
+              )}
             </>
           )}
+
+          {/* Dealership Application Responsive Footer */}
+          <footer className="app-footer">
+            <div className="footer-content">
+              <div className="footer-left">
+                <span className="footer-brand">{settings.showroom_name || settings.showroomName || 'APEX HORIZON MOTORS'}</span>
+                <span className="footer-separator">•</span>
+                <span className="footer-status"><span className="status-dot active"></span> SQLite Enterprise Engine Live</span>
+              </div>
+              <div className="footer-right">
+                <span>AutoCore Dealership OS v2.4</span>
+                <span className="footer-separator">•</span>
+                <span>GST: {settings.gstin || '27AAACA9928P1Z8'}</span>
+                <span className="footer-separator">•</span>
+                <span>© {new Date().getFullYear()} All Rights Reserved</span>
+              </div>
+            </div>
+          </footer>
         </main>
       </div>
 
@@ -885,7 +1564,17 @@ export default function App() {
         onClose={() => setIsInvoiceOpen(false)}
         sale={selectedInvoiceSale}
         settings={settings}
+        onRecordPayment={handleTriggerPayment}
       />
+
+      {selectedReceipt && (
+        <ReceiptModal
+          isOpen={isReceiptModalOpen}
+          onClose={() => { setIsReceiptModalOpen(false); setSelectedReceipt(null); }}
+          receipt={selectedReceipt}
+          settings={settings}
+        />
+      )}
 
       <VehicleModal 
         isOpen={isVehicleModalOpen}
@@ -919,6 +1608,24 @@ export default function App() {
         initialData={testDriveInitialData}
       />
 
+      <EstimateModal 
+        isOpen={isEstimateModalOpen}
+        onClose={() => setIsEstimateModalOpen(false)}
+        onSave={handleSaveEstimate}
+        estimate={editingEstimate}
+        vehicles={vehicles}
+        customers={customers}
+        initialData={estimateInitialData}
+      />
+
+      <EstimateViewModal
+        isOpen={isEstimateViewOpen}
+        onClose={() => { setIsEstimateViewOpen(false); setSelectedEstimateForView(null); }}
+        estimate={selectedEstimateForView}
+        settings={settings}
+        onConvertToQuotation={handleConvertEstimateToQuotation}
+      />
+
       <ServiceModal 
         isOpen={isServiceModalOpen}
         onClose={() => setIsServiceModalOpen(false)}
@@ -932,14 +1639,15 @@ export default function App() {
         staffMember={editingStaff}
       />
 
-      <EnquiryModal
+      <EnquiryModal 
         isOpen={isEnquiryModalOpen}
         onClose={() => setIsEnquiryModalOpen(false)}
         onSave={handleSaveEnquiry}
         enquiry={editingEnquiry}
+        vehicles={vehicles}
       />
 
-      <QuotationModal
+      <QuotationModal 
         isOpen={isQuotationModalOpen}
         onClose={() => setIsQuotationModalOpen(false)}
         onSave={handleSaveQuotation}
@@ -948,22 +1656,21 @@ export default function App() {
         customers={customers}
       />
 
-      <QuotationViewModal
+      <QuotationViewModal 
         isOpen={isQuotationViewOpen}
         onClose={() => setIsQuotationViewOpen(false)}
         quotation={selectedQuotation}
         settings={settings}
-        onConvertToSale={handleConvertToSale}
       />
 
-      <PartModal
+      <PartModal 
         isOpen={isPartModalOpen}
         onClose={() => setIsPartModalOpen(false)}
         onSave={handleSavePart}
         part={editingPart}
       />
 
-      <ProcurementModal
+      <ProcurementModal 
         isOpen={isProcurementModalOpen}
         onClose={() => setIsProcurementModalOpen(false)}
         onSave={handleSaveProcurement}

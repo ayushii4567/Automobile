@@ -1,15 +1,28 @@
-import React, { useState, useMemo } from 'react';
-import { Calculator, IndianRupee, TrendingDown, BarChart2, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Calculator, IndianRupee, TrendingDown, BarChart2, RefreshCw, ArrowRight, Building2, CheckCircle2 } from 'lucide-react';
 
 function formatINR(val) {
   return '₹' + Number(val).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 }
 
-export default function Finance() {
-  const [vehiclePrice, setVehiclePrice] = useState(1500000);
-  const [downPayment, setDownPayment] = useState(300000);
+export default function Finance({ initialData = null, onApplyLoan }) {
+  const [vehiclePrice, setVehiclePrice] = useState(() => {
+    return initialData?.totalAmount || initialData?.vehiclePrice || initialData?.price || 1500000;
+  });
+  const [downPayment, setDownPayment] = useState(() => {
+    const p = initialData?.totalAmount || initialData?.vehiclePrice || initialData?.price || 1500000;
+    return Math.round(p * 0.2);
+  });
   const [interestRate, setInterestRate] = useState(8.5);
   const [tenure, setTenure] = useState(60); // months
+
+  useEffect(() => {
+    if (initialData) {
+      const price = Number(initialData.totalAmount || initialData.vehiclePrice || initialData.price || 1500000);
+      setVehiclePrice(price);
+      setDownPayment(Math.round(price * 0.2));
+    }
+  }, [initialData]);
 
   const emi = useMemo(() => {
     const principal = vehiclePrice - downPayment;
@@ -73,10 +86,79 @@ export default function Finance() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>EMI & Finance Calculator</h2>
           <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>Calculate monthly installments, total interest and loan amortization for any vehicle.</p>
         </div>
-        <button onClick={reset} className="btn btn-secondary" style={{ gap: '6px' }}>
-          <RefreshCw size={14} /> Reset
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {onApplyLoan && (
+            <button
+              onClick={() => onApplyLoan({
+                customerId: initialData?.customerId || initialData?.customer_id,
+                customerName: initialData?.customerName || initialData?.customer_name,
+                vehicleId: initialData?.vehicleId || initialData?.vehicle_id,
+                vehicleName: initialData?.vehicleName || initialData?.vehicle_name,
+                loanAmount: emi ? emi.loanAmount : vehiclePrice - downPayment,
+                downPayment,
+                tenureMonths: tenure,
+                interestRate,
+                emiAmount: emi ? emi.monthly : 0
+              })}
+              className="btn btn-primary"
+              style={{ gap: '6px', background: '#2563eb', borderColor: '#2563eb' }}
+            >
+              <Building2 size={15} />
+              <span>Submit Loan Application</span>
+            </button>
+          )}
+          <button onClick={reset} className="btn btn-secondary" style={{ gap: '6px' }}>
+            <RefreshCw size={14} /> Reset
+          </button>
+        </div>
       </div>
+
+      {/* Workflow Pre-Fill Indicator */}
+      {initialData && (
+        <div style={{
+          background: '#eff6ff',
+          border: '1px solid #bfdbfe',
+          borderRadius: '10px',
+          padding: '12px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={18} color="#2563eb" />
+            <div>
+              <span style={{ fontWeight: 700, color: '#1e40af', fontSize: '0.88rem' }}>
+                Pre-loaded from Quotation #{initialData.quotationNo || initialData.id}
+              </span>
+              <div style={{ fontSize: '0.78rem', color: '#3b82f6', marginTop: '2px' }}>
+                Vehicle: <strong>{initialData.vehicleName || 'Showroom Vehicle'}</strong> | Client: <strong>{initialData.customerName || 'Prospective Buyer'}</strong>
+              </div>
+            </div>
+          </div>
+          {onApplyLoan && (
+            <button
+              onClick={() => onApplyLoan({
+                customerId: initialData.customerId || initialData.customer_id,
+                customerName: initialData.customerName || initialData.customer_name,
+                vehicleId: initialData.vehicleId || initialData.vehicle_id,
+                vehicleName: initialData.vehicleName || initialData.vehicle_name,
+                loanAmount: emi ? emi.loanAmount : vehiclePrice - downPayment,
+                downPayment,
+                tenureMonths: tenure,
+                interestRate,
+                emiAmount: emi ? emi.monthly : 0
+              })}
+              className="btn btn-primary btn-sm"
+              style={{ padding: '6px 14px', background: '#2563eb', borderColor: '#2563eb', gap: '6px' }}
+            >
+              <Building2 size={14} />
+              <span>Submit to Bank &rarr;</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="responsive-finance-grid">
         {/* Input Panel */}

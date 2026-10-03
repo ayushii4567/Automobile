@@ -33,7 +33,7 @@ export default function Modal({
     <div className="modal-overlay" onClick={onClose}>
       <div 
         className="modal-content" 
-        style={{ '--modal-max-width': maxWidth, maxWidth }}
+        style={{ '--modal-max-width': maxWidth, maxWidth: `min(${maxWidth}, 100%)` }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle for bottom sheet on mobile */}

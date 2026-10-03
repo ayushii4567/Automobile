@@ -10,7 +10,8 @@ import {
   CalendarClock, 
   DollarSign,
   TrendingUp,
-  Tag
+  Tag,
+  Calculator
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 
@@ -20,7 +21,8 @@ export default function Quotations({
   onEditQuotation, 
   onDeleteQuotation, 
   onViewQuotation, 
-  onConvertToSale 
+  onConvertToSale,
+  onApplyFinance
 }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -235,6 +237,19 @@ export default function Quotations({
                           <Eye size={14} />
                           <span>View</span>
                         </button>
+
+                        {/* Calculate EMI / Apply Bank Finance */}
+                        {onApplyFinance && (
+                          <button
+                            onClick={() => onApplyFinance(quot)}
+                            className="btn btn-secondary btn-sm"
+                            title="Calculate EMI & Apply for Bank Loan"
+                            style={{ padding: '6px 10px', color: '#2563eb', borderColor: '#bfdbfe', background: '#eff6ff' }}
+                          >
+                            <Calculator size={14} />
+                            <span>EMI</span>
+                          </button>
+                        )}
 
                         {/* Convert to Sale (if Accepted or ready) */}
                         {onConvertToSale && (

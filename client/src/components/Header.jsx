@@ -29,7 +29,8 @@ export default function Header({
   customers = [],
   quotations = [],
   sales = [],
-  onToggleMobileMenu
+  onToggleMobileMenu,
+  onOpenMobileMenu
 }) {
   const [bellOpen, setBellOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -55,13 +56,15 @@ export default function Header({
     testdrives: { title: 'Test Drive Bookings', sub: 'Schedule and track customer test drives' },
     service: { title: 'Service Center', sub: 'Maintenance requests, repairs, and technician jobs' },
     staff: { title: 'Staff Management', sub: 'Showroom team members and sales performance' },
-    reports: { title: 'Financial Reports', sub: 'Monthly sales numbers, brand revenue, and showroom summaries' },
+    reports: { title: 'Financial Reports & Accounts', sub: 'Audited sales, revenue, profit & loss, GST, and balance sheets' },
     settings: { title: 'Settings', sub: 'Showroom details, tax rates, and contact information' },
     finance: { title: 'EMI Calculator', sub: 'Calculate monthly installments and loan amortization for any vehicle' },
     enquiries: { title: 'Enquiries & Leads', sub: 'Walk-in, phone, and online leads with follow-up management' },
     quotations: { title: 'Pro-Forma Quotations', sub: 'Generate on-road price estimates, tax breakdowns, and pro-forma documents' },
     parts: { title: 'Spare Parts & Accessories', sub: 'Manage genuine OEM components, tuning accessories, and stock levels' },
     procurement: { title: 'Vehicle Procurement', sub: 'Track manufacturer factory purchase orders, VINs, and transit status' },
+    reminders: { title: 'Reminders & Alerts', sub: 'Proactive payment, insurance, workshop, and client occasion alerts' },
+    communications: { title: 'Communication & Campaigns', sub: 'Multi-channel WhatsApp, email, SMS sharing and marketing campaigns' }
   };
 
   const current = tabTitles[activeTab] || { title: 'AUTOCORE', sub: 'Showroom Management Platform' };
@@ -140,7 +143,7 @@ export default function Header({
       {/* Left: Hamburger Menu (Mobile) & Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0', overflow: 'hidden' }}>
         <button
-          onClick={onToggleMobileMenu}
+          onClick={onToggleMobileMenu || onOpenMobileMenu}
           className="show-on-mobile btn btn-secondary btn-icon"
           style={{
             width: '36px',
@@ -186,7 +189,7 @@ export default function Header({
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         
         {/* Global Search Bar (Fluid & Responsive) */}
-        <div ref={searchRef} style={{ position: 'relative', width: 'clamp(100px, 14vw, 230px)', flexShrink: 1 }}>
+        <div ref={searchRef} className="header-search-wrap" style={{ position: 'relative', width: 'clamp(100px, 14vw, 230px)', flexShrink: 1 }}>
           <Search 
             size={15} 
             color="#94a3b8" 
@@ -490,6 +493,28 @@ export default function Header({
                     <ArrowRight size={13} color="#94a3b8" style={{ marginTop: '4px' }} />
                   </div>
                 ))}
+              </div>
+
+              <div style={{ padding: '8px 12px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', textAlign: 'center' }}>
+                <button
+                  onClick={() => {
+                    if (onNavigate) onNavigate('reminders');
+                    setBellOpen(false);
+                  }}
+                  style={{
+                    background: '#0f172a',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '6px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}
+                >
+                  Open Full Reminders & Action Center →
+                </button>
               </div>
             </div>
           )}

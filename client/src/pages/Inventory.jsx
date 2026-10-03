@@ -389,8 +389,8 @@ export default function Inventory({
         </div>
       ) : (
         /* Table View */
-        <div className="glass-card" style={{ padding: '0', overflow: 'hidden' }}>
-          <div className="data-table-wrapper">
+        <div className="glass-card" style={{ padding: '0', overflowX: 'auto', maxWidth: '100%' }}>
+          <div className="data-table-wrapper" style={{ border: 'none' }}>
             <table className="data-table">
               <thead>
                 <tr>

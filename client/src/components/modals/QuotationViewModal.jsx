@@ -9,10 +9,17 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
     window.print();
   };
 
-  const showroom = settings.showroomName || 'AutoCore MotorHub';
+  const showroom = settings.showroom_name || settings.showroomName || 'Apex Horizon Motors';
+  const tagline = settings.tagline || 'Authorized Automobile Dealership & Showroom';
   const address = settings.address || 'Plot 42, Bandra-Kurla Complex, Bandra East, Mumbai 400051';
   const phone = settings.phone || '+91 98200 12345';
-  const email = settings.email || 'info@autocore-motors.in';
+  const email = settings.email || 'info@apexhorizonmotors.in';
+  const gstin = settings.gstin || '27AAACA9928P1Z8';
+  const currency = settings.currency_symbol || settings.currencySymbol || '₹';
+  const logoUrl = settings.logo_url || settings.logoUrl;
+  const signatoryTitle = settings.authorized_signatory || settings.authorizedSignatory || 'Authorized Dealership Representative';
+  const signatoryName = settings.signatory_name || settings.signatoryName || '';
+  const quotationTerms = settings.quotation_terms || settings.quotationTerms || 'This quotation is valid for 30 days from date of issue. Prices and government taxes are subject to change without prior notice.';
 
   return (
     <Modal
@@ -41,25 +48,38 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
           gap: '12px'
         }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '6px',
-                background: '#ef4444',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff'
-              }}>
-                <Car size={18} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              {logoUrl ? (
+                <img 
+                  src={logoUrl.startsWith('/') ? logoUrl : `/${logoUrl}`} 
+                  alt={showroom} 
+                  style={{ maxHeight: '40px', maxWidth: '140px', objectFit: 'contain' }}
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              ) : (
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  background: '#ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff'
+                }}>
+                  <Car size={18} />
+                </div>
+              )}
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
+                  {showroom}
+                </h2>
+                <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{tagline}</div>
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a' }}>
-                {showroom}
-              </h2>
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>{address}</p>
-            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Phone: {phone} • Email: {email}</p>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0' }}>{address}</p>
+            <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '2px 0' }}>Phone: {phone} • Email: {email}</p>
+            <p style={{ fontSize: '0.72rem', color: '#94a3b8', margin: '2px 0' }}>GSTIN: <strong>{gstin}</strong></p>
           </div>
 
           <div style={{ textAlign: 'right' }}>
@@ -223,35 +243,38 @@ export default function QuotationViewModal({ isOpen, onClose, quotation, setting
           </table>
         </div>
 
-        {quotation.notes && (
-          <div style={{
-            fontSize: '0.78rem',
-            color: '#64748b',
-            background: '#f8fafc',
-            padding: '10px 14px',
-            borderRadius: '6px',
-            marginBottom: '20px',
-            borderLeft: '3px solid #ef4444'
-          }}>
-            <strong>Remarks / Special Terms:</strong> {quotation.notes}
-          </div>
-        )}
+        {/* Terms & Conditions */}
+        <div style={{
+          fontSize: '0.75rem',
+          color: '#64748b',
+          background: '#f8fafc',
+          padding: '10px 14px',
+          borderRadius: '6px',
+          marginBottom: '20px',
+          borderLeft: '3px solid #ef4444',
+          lineHeight: 1.5
+        }}>
+          <strong>Quotation Terms & Conditions: </strong> {quotationTerms}
+          {quotation.notes && <div style={{ marginTop: '4px' }}><strong>Special Remarks:</strong> {quotation.notes}</div>}
+        </div>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '30px',
-          marginTop: '30px',
+          marginTop: '24px',
           paddingTop: '20px',
           borderTop: '1px solid #e2e8f0'
         }}>
           <div>
             <div style={{ borderBottom: '1px solid #cbd5e1', height: '35px' }}></div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '6px' }}>Authorized Showroom Representative</div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a', marginTop: '6px' }}>{signatoryTitle}</div>
+            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{signatoryName ? `${signatoryName} • ` : ''}{showroom}</div>
           </div>
           <div>
             <div style={{ borderBottom: '1px solid #cbd5e1', height: '35px' }}></div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '6px' }}>Client Acceptance Signature</div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#0f172a', marginTop: '6px' }}>Client Acceptance Signature</div>
+            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>I agree to the proposed terms and pricing</div>
           </div>
         </div>
       </div>

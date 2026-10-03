@@ -9,7 +9,8 @@ import {
   Car, 
   Edit2, 
   Trash2, 
-  CalendarClock 
+  CalendarClock,
+  Calculator
 } from 'lucide-react';
 
 export default function Customers({ 
@@ -17,7 +18,8 @@ export default function Customers({
   onAddCustomer, 
   onEditCustomer, 
   onDeleteCustomer,
-  onBookTestDrive 
+  onBookTestDrive,
+  onNewEstimate
 }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -86,7 +88,7 @@ export default function Customers({
       {/* Customer Cards Grid */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
         gap: '20px'
       }}>
         {filtered.map((customer) => (
@@ -210,13 +212,27 @@ export default function Customers({
                 </button>
               </div>
 
-              <button 
-                onClick={() => onBookTestDrive({ customerName: customer.name, customerPhone: customer.phone, interestedVehicle: customer.interestedVehicle })} 
-                className="btn btn-secondary btn-sm"
-              >
-                <CalendarClock size={12} />
-                <span>Test Drive</span>
-              </button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button 
+                  onClick={() => onBookTestDrive({ customerName: customer.name, customerPhone: customer.phone, interestedVehicle: customer.interestedVehicle })} 
+                  className="btn btn-secondary btn-sm"
+                  title="Book Test Drive for Customer"
+                >
+                  <CalendarClock size={12} />
+                  <span>Drive</span>
+                </button>
+                {onNewEstimate && (
+                  <button 
+                    onClick={() => onNewEstimate({ customerId: customer.id, customerName: customer.name, customerPhone: customer.phone, vehicleInterest: customer.interestedVehicle })} 
+                    className="btn btn-primary btn-sm"
+                    title="Generate Vehicle Cost Estimate"
+                    style={{ background: '#2563eb', borderColor: '#2563eb' }}
+                  >
+                    <Calculator size={12} />
+                    <span>Estimate</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}

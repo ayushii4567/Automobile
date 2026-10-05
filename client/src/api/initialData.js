@@ -347,5 +347,242 @@ export const initialData = {
       revenueGenerated: 3600000,
       avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"
     }
+  ],
+
+  pdi: [
+    {
+      id: "pdi-1",
+      saleId: "sale-101",
+      invoiceNo: "INV-2026-0881",
+      vehicleName: "Tata Safari Dark Edition (2024)",
+      vin: "MAT621980P349012",
+      customerName: "Ananya Verma",
+      inspectorName: "Vikram Malhotra",
+      inspectionDate: "2026-09-17",
+      exteriorStatus: "Passed",
+      interiorStatus: "Passed",
+      engineFluidsStatus: "Passed",
+      electricalsStatus: "Passed",
+      toolkitProvided: true,
+      keysProvided: 2,
+      status: "Passed",
+      notes: "Full 120-point pre-delivery inspection cleared. Sanitized and ready for handover."
+    }
+  ],
+
+  tradeins: [
+    {
+      id: "ex-1",
+      customerName: "Ananya Verma",
+      customerPhone: "+91 98201 54321",
+      oldBrand: "Hyundai",
+      oldModel: "Creta SX(O) Petrol",
+      oldYear: 2020,
+      registrationNo: "MH-02-EE-4512",
+      odometerKm: 38500,
+      conditionRating: "Good",
+      estimatedValuation: 780000,
+      approvedAdjustmentAmount: 780000,
+      adjustedAgainstSaleId: "sale-101",
+      status: "Approved",
+      notes: "Clean service history from authorized Hyundai center. Single owner."
+    }
+  ],
+
+  estimates: [
+    {
+      id: "est-1",
+      estimateNo: "EST-2026-0041",
+      customerName: "Rohit Deshmukh",
+      phone: "+91 98112 34567",
+      email: "rohit.deshmukh@gmail.com",
+      vehicleName: "Mahindra XUV700 AX7 Luxury",
+      exShowroomPrice: 2150000,
+      rtoCharges: 215000,
+      insuranceEstimate: 75000,
+      accessories: 25000,
+      fastagTcs: 22000,
+      totalEstimatedOnRoad: 2487000,
+      validUntil: "2026-10-15",
+      status: "Active",
+      createdAt: "2026-09-20"
+    }
+  ],
+
+  financeApps: [
+    {
+      id: "fin-1",
+      saleId: "sale-102",
+      customerName: "Rahul Sharma",
+      vehicleName: "Mahindra XUV700 AX7 Luxury",
+      financier: "HDFC Bank Auto Loans",
+      loanAmount: 1800000,
+      tenureMonths: 60,
+      interestRate: 8.4,
+      monthlyEmi: 36850,
+      status: "Sanctioned",
+      appliedDate: "2026-09-17",
+      approvalDate: "2026-09-18",
+      notes: "Sanction letter ref: HDFC-AL-88219 received. KYC verified."
+    }
+  ],
+
+  insurance: [
+    {
+      id: "ins-1",
+      policyNo: "POL-ICICI-2026-091",
+      customerName: "Ananya Verma",
+      vehicleName: "Tata Safari Dark Edition",
+      vin: "MAT621980P349012",
+      provider: "ICICI Lombard General Insurance",
+      policyType: "Comprehensive Zero Dep (1+3 Years)",
+      premiumAmount: 68000,
+      coverageStartDate: "2026-09-18",
+      coverageEndDate: "2027-09-17",
+      status: "Active",
+      nomineeName: "Rohan Verma (Spouse)"
+    }
+  ],
+
+  warranties: [
+    {
+      id: "war-1",
+      warrantyNo: "WRN-TATA-EXT-442",
+      customerName: "Ananya Verma",
+      vehicleName: "Tata Safari Dark Edition",
+      vin: "MAT621980P349012",
+      packageType: "Royal Platinum Extended 5-Year / 150,000 KM",
+      startDate: "2026-09-18",
+      endDate: "2031-09-17",
+      maxKm: 150000,
+      cost: 28500,
+      status: "Active"
+    }
+  ],
+
+  appointments: [
+    {
+      id: "apt-1",
+      customerName: "Sanjay Singhania",
+      phone: "+91 99203 11223",
+      purpose: "VIP Vehicle Consultation & Test Drive",
+      vehicleInterested: "Mahindra XUV700 AX7 Luxury",
+      date: "2026-10-06",
+      timeSlot: "11:00 AM - 12:30 PM",
+      assignedStaff: "Rajesh Sharma",
+      status: "Confirmed",
+      notes: "Interested in corporate leasing quotation."
+    }
+  ],
+
+  vendors: [
+    {
+      id: "ven-1",
+      name: "Brembo Auto Parts India Pvt Ltd",
+      contactPerson: "Kavita Rao",
+      email: "orders@bremboindia.com",
+      phone: "+91 20 6688 1234",
+      category: "Braking & Performance Spares",
+      gstin: "27AABCB1234F1Z8",
+      address: "Bhosari MIDC, Pune, MH",
+      status: "Active"
+    },
+    {
+      id: "ven-2",
+      name: "Mobil 1 Lubricants Distributor",
+      contactPerson: "Arun Mehra",
+      email: "dist@mobilindiapartners.com",
+      phone: "+91 22 2511 8899",
+      category: "Oils, Lubricants & Coolants",
+      gstin: "27AABCM9876E1Z4",
+      address: "Turbhe Vashi, Navi Mumbai, MH",
+      status: "Active"
+    }
+  ],
+
+  payments: [
+    {
+      id: "pay-1",
+      receiptNo: "RCPT-2026-002",
+      saleId: "sale-101",
+      customerName: "Ananya Verma",
+      amount: 500000,
+      paymentMethod: "NEFT / RTGS",
+      transactionRef: "HDFCN262510988",
+      paymentDate: "2026-09-17",
+      paymentType: "Down Payment",
+      status: "Success",
+      notes: "Received towards Tata Safari booking confirmation."
+    }
+  ],
+
+  feedback: [
+    {
+      id: "fb-1",
+      customerName: "Ananya Verma",
+      vehicleName: "Tata Safari Dark Edition",
+      rating: 5,
+      deliveryExperienceRating: 5,
+      salesPersonRating: 5,
+      reviewText: "Exceptional handover experience! Rajesh and the team made the dark edition delivery unforgettable.",
+      date: "2026-09-18",
+      status: "Published"
+    }
+  ],
+
+  payroll: [
+    {
+      id: "payr-1",
+      month: "September 2026",
+      staffId: "stf-1",
+      staffName: "Rajesh Sharma",
+      role: "Senior Sales Manager",
+      baseSalary: 75000,
+      salesCommission: 48000,
+      bonus: 10000,
+      deductions: 5000,
+      netSalary: 128000,
+      paymentStatus: "Paid",
+      paymentDate: "2026-09-30"
+    },
+    {
+      id: "payr-2",
+      month: "September 2026",
+      staffId: "stf-2",
+      staffName: "Priya Patel",
+      role: "Key Account Executive",
+      baseSalary: 60000,
+      salesCommission: 36000,
+      bonus: 8000,
+      deductions: 4000,
+      netSalary: 100000,
+      paymentStatus: "Paid",
+      paymentDate: "2026-09-30"
+    }
+  ],
+
+  expenses: [
+    {
+      id: "exp-1",
+      category: "Marketing & Digital Ads",
+      title: "Google Ads & Meta Festival Campaign",
+      amount: 45000,
+      spentBy: "Marcus Vance",
+      date: "2026-09-22",
+      paymentMode: "Corporate Card",
+      status: "Approved",
+      vendor: "Google Ads India"
+    },
+    {
+      id: "exp-2",
+      category: "Showroom Utilities",
+      title: "Showroom Electricity & High-Bay Lighting",
+      amount: 28500,
+      spentBy: "Operations Dept",
+      date: "2026-09-25",
+      paymentMode: "Net Banking",
+      status: "Approved",
+      vendor: "Tata Power"
+    }
   ]
 };

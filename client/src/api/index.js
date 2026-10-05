@@ -2,6 +2,13 @@ import { initialData } from './initialData';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
+const hasExplicitApiUrl = Boolean(import.meta.env.VITE_API_URL);
+const isLocalhost = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+// Automatically enable offline mock mode on Vercel or any static host without an explicit external backend
+let isOfflineMode = !hasExplicitApiUrl && !isLocalhost;
+
 export function getToken() {
   try {
     return localStorage.getItem('apex_token');
@@ -36,6 +43,14 @@ function setLocal(key, data) {
 }
 
 async function request(endpoint, options = {}, fallbackAction) {
+  // If in offline mode (e.g. Vercel static demo), immediately resolve fallback without 404 network spam
+  if (isOfflineMode) {
+    if (fallbackAction) return fallbackAction();
+    const method = (options.method || 'GET').toUpperCase();
+    if (method === 'GET') return [];
+    return { success: true };
+  }
+
   try {
     const token = getToken();
     const headers = {
@@ -77,7 +92,11 @@ async function request(endpoint, options = {}, fallbackAction) {
     customErr.status = res.status;
     throw customErr;
   } catch (e) {
-    // Explicitly throw auth/permission errors or Bad Request (400) logic errors
+    // If backend is missing on local/remote, auto-switch to offline mode to prevent cascading 404s
+    if (e.status === 404 || e.status === 502 || !e.status || e.message?.includes('Failed to fetch') || e.message?.includes('API Offline')) {
+      isOfflineMode = true;
+    }
+
     if (e.message && (e.message.includes('Access denied') || e.message.includes('Unauthorized') || e.message.includes('Authentication'))) {
       throw e;
     }
@@ -85,21 +104,15 @@ async function request(endpoint, options = {}, fallbackAction) {
       throw e;
     }
 
-    // Falls back to local store for network errors or missing backend (404/502 on Vercel)
     if (fallbackAction) {
       return fallbackAction();
     }
 
-    // Safety net for frontend-only / static deployments (e.g. Vercel without express server)
-    if (e.status === 404 || e.status === 502 || !e.status || e.message?.includes('Failed to fetch') || e.message?.includes('API Offline')) {
-      const method = (options.method || 'GET').toUpperCase();
-      if (method === 'GET') {
-        return [];
-      }
-      return { success: true };
+    const method = (options.method || 'GET').toUpperCase();
+    if (method === 'GET') {
+      return [];
     }
-
-    throw e;
+    return { success: true };
   }
 }
 
@@ -137,27 +150,41 @@ const testdrivesCrud = createCrud('testdrives', initialData.testdrives, 'td');
 const servicesCrud = createCrud('services', initialData.services, 'srv');
 const staffCrud = createCrud('staff', initialData.staff, 'stf');
 const enquiriesCrud = createCrud('enquiries', initialData.enquiries, 'enq');
-const estimatesCrud = createCrud('estimates', [], 'est');
+const estimatesCrud = createCrud('estimates', initialData.estimates || [], 'est');
 const quotationsCrud = createCrud('quotations', initialData.quotations, 'quot');
 const partsCrud = createCrud('parts', initialData.parts, 'part');
 const procurementCrud = createCrud('procurement', initialData.procurement, 'po');
 
-// Operational & Back-office modules CRUD
-const pdiCrud = createCrud('pdi', [], 'pdi');
-const tradeInsCrud = createCrud('tradeins', [], 'ex');
-const financeAppsCrud = createCrud('finance-apps', [], 'fin');
-const insuranceCrud = createCrud('insurance', [], 'ins');
-const warrantiesCrud = createCrud('warranties', [], 'war');
-const appointmentsCrud = createCrud('appointments', [], 'apt');
-const vendorsCrud = createCrud('vendors', [], 'ven');
-const paymentsCrud = createCrud('payments', [], 'pay');
-const feedbackCrud = createCrud('feedback', [], 'fb');
-const payrollCrud = createCrud('payroll', [], 'payr');
-const expensesCrud = createCrud('expenses', [], 'exp');
+// Operational & Back-office modules CRUD with initial data
+const pdiCrud = createCrud('pdi', initialData.pdi || [], 'pdi');
+const tradeInsCrud = createCrud('tradeins', initialData.tradeins || [], 'ex');
+const financeAppsCrud = createCrud('finance-apps', initialData.financeApps || [], 'fin');
+const insuranceCrud = createCrud('insurance', initialData.insurance || [], 'ins');
+const warrantiesCrud = createCrud('warranties', initialData.warranties || [], 'war');
+const appointmentsCrud = createCrud('appointments', initialData.appointments || [], 'apt');
+const vendorsCrud = createCrud('vendors', initialData.vendors || [], 'ven');
+const paymentsCrud = createCrud('payments', initialData.payments || [], 'pay');
+const feedbackCrud = createCrud('feedback', initialData.feedback || [], 'fb');
+const payrollCrud = createCrud('payroll', initialData.payroll || [], 'payr');
+const expensesCrud = createCrud('expenses', initialData.expenses || [], 'exp');
 
 export const api = {
   // Authentication & Session
   login: async (username, password) => {
+    if (isOfflineMode) {
+      const isSales = username?.toLowerCase() === 'sales';
+      const mockUser = {
+        id: isSales ? 'u2' : 'u1',
+        username: username || 'admin',
+        name: isSales ? 'Alex Rivera' : 'Marcus Vance',
+        role: isSales ? 'SALES_EXECUTIVE' : 'ADMIN'
+      };
+      const mockToken = 'mock-jwt-token-123';
+      setToken(mockToken);
+      localStorage.setItem('apex_user', JSON.stringify(mockUser));
+      return { token: mockToken, user: mockUser };
+    }
+
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -172,7 +199,6 @@ export const api = {
         }
         return data;
       }
-      // If 404 or 502, backend is not reachable (e.g. Vercel frontend-only deploy)
       if (res.status === 404 || res.status === 502) {
         throw new Error('API Offline');
       }
@@ -180,8 +206,7 @@ export const api = {
       throw new Error(err.error || 'Invalid credentials');
     } catch (e) {
       if (e.message !== 'Invalid credentials') {
-        // Fallback for Vercel/Frontend-only deployments
-        console.warn('Backend API unreachable, using local mock session.');
+        isOfflineMode = true;
         const isSales = username?.toLowerCase() === 'sales';
         const mockUser = {
           id: isSales ? 'u2' : 'u1',
@@ -199,9 +224,11 @@ export const api = {
   },
 
   logout: async () => {
-    try {
-      await request('/auth/logout', { method: 'POST' });
-    } catch {}
+    if (!isOfflineMode) {
+      try {
+        await request('/auth/logout', { method: 'POST' });
+      } catch {}
+    }
     setToken(null);
     try {
       localStorage.removeItem('apex_user');
@@ -209,13 +236,17 @@ export const api = {
     } catch {}
   },
 
-  getMe: () => request('/auth/me', {}, () => {
-    try {
-      const saved = localStorage.getItem('apex_user');
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return { id: 'u1', username: 'admin', name: 'Marcus Vance', role: 'ADMIN' };
-  }),
+  getMe: () => {
+    const fallback = () => {
+      try {
+        const saved = localStorage.getItem('apex_user');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+      return { id: 'u1', username: 'admin', name: 'Marcus Vance', role: 'ADMIN' };
+    };
+    if (isOfflineMode) return Promise.resolve(fallback());
+    return request('/auth/me', {}, fallback);
+  },
 
   // Dashboard & Metrics
   getDashboard: () => request('/dashboard', {}, () => {
@@ -246,6 +277,9 @@ export const api = {
   getDealershipProfile: () => request('/dealership-profile', {}, () => getLocal('settings', initialData.settings || {})),
   getDealershipSettings: () => request('/dealership-settings', {}, () => getLocal('settings', initialData.settings || {})),
   uploadLogo: async (file) => {
+    if (isOfflineMode) {
+      return { success: true, logoUrl: '/logo.png' };
+    }
     try {
       const formData = new FormData();
       formData.append('logo', file);
@@ -319,7 +353,7 @@ export const api = {
   updateEstimate: estimatesCrud.update,
   deleteEstimate: estimatesCrud.delete,
   convertEstimateToQuotation: (id) => request(`/estimates/${id}/convert-quotation`, { method: 'POST' }, () => {
-    const estimates = getLocal('estimates', []);
+    const estimates = getLocal('estimates', initialData.estimates || []);
     const est = estimates.find(e => e.id === id);
     if (est) {
       const quotations = getLocal('quotations', initialData.quotations || []);
@@ -410,14 +444,14 @@ export const api = {
   getReceiptById: (id) => request(`/receipts/${id}`, {}, () => null),
 
   // Payroll & Expenses
-  getPayroll: (params = '') => request(`/payroll${params ? '?' + params : ''}`, {}, () => getLocal('payroll', [])),
+  getPayroll: (params = '') => request(`/payroll${params ? '?' + params : ''}`, {}, () => getLocal('payroll', initialData.payroll || [])),
   createPayroll: payrollCrud.create,
   updatePayroll: payrollCrud.update,
   deletePayroll: payrollCrud.delete,
   generateBatchPayroll: (data = {}) => request('/payroll/generate-batch', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
   getStaffSalaryHistory: (staffId) => request(`/payroll/staff/${staffId}`, {}, () => []),
 
-  getExpenses: (params = '') => request(`/expenses${params ? '?' + params : ''}`, {}, () => getLocal('expenses', [])),
+  getExpenses: (params = '') => request(`/expenses${params ? '?' + params : ''}`, {}, () => getLocal('expenses', initialData.expenses || [])),
   createExpense: expensesCrud.create,
   updateExpense: expensesCrud.update,
   deleteExpense: expensesCrud.delete,
@@ -604,6 +638,22 @@ export const api = {
   }),
   getDocumentHistory: (entityType, entityId) => request(`/documents/${entityType}/${entityId}/history`, {}, () => []),
   uploadDocument: async (formData) => {
+    if (isOfflineMode) {
+      const docs = getLocal('documents', []);
+      const file = formData.get('file');
+      const newDoc = {
+        id: `doc-${Date.now()}`,
+        title: formData.get('title') || file?.name || 'Uploaded Document',
+        entity_type: formData.get('entity_type') || 'CUSTOMER',
+        entity_id: formData.get('entity_id') || '',
+        doc_type: formData.get('doc_type') || 'OTHER',
+        file_name: file?.name || 'document.pdf',
+        file_size: file?.size || 102400,
+        created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      };
+      setLocal('documents', [newDoc, ...docs]);
+      return { success: true, document: newDoc };
+    }
     try {
       const token = getToken();
       const res = await fetch(`${API_BASE}/documents/upload`, {

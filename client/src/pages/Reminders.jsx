@@ -327,6 +327,9 @@ export default function Reminders({ currentUser, onNavigate }) {
         alignItems: 'center',
         gap: '6px',
         overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        flexWrap: 'nowrap',
         padding: '6px',
         background: '#f1f5f9',
         borderRadius: '10px'
@@ -351,6 +354,7 @@ export default function Reminders({ currentUser, onNavigate }) {
                 fontSize: '0.8rem',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                flexShrink: 0,
                 transition: 'all 0.15s ease'
               }}
             >
@@ -391,7 +395,7 @@ export default function Reminders({ currentUser, onNavigate }) {
             return (
               <div 
                 key={rem.id}
-                className="glass-card"
+                className="glass-card reminder-card"
                 style={{
                   padding: '18px 22px',
                   display: 'flex',
@@ -402,8 +406,8 @@ export default function Reminders({ currentUser, onNavigate }) {
                   borderLeft: `5px solid ${pStyle.border}`
                 }}
               >
-                <div style={{ flex: 1, minWidth: '280px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <div className="reminder-content" style={{ flex: '1 1 280px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                     <span style={{
                       fontSize: '0.72rem',
                       fontWeight: 800,
@@ -425,21 +429,21 @@ export default function Reminders({ currentUser, onNavigate }) {
                     </span>
                   </div>
 
-                  <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: '0 0 4px' }}>
+                  <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0f172a', margin: '0 0 4px', lineHeight: 1.35 }}>
                     {rem.title}
                   </h4>
-                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
                     {rem.description}
                   </p>
                   {rem.customerPhone && (
-                    <div style={{ fontSize: '0.75rem', color: '#2563eb', marginTop: '4px', fontWeight: 600 }}>
+                    <div style={{ fontSize: '0.75rem', color: '#2563eb', marginTop: '6px', fontWeight: 600, wordBreak: 'break-all' }}>
                       Contact: {rem.customerPhone} {rem.customerEmail ? `| ${rem.customerEmail}` : ''}
                     </div>
                   )}
                 </div>
 
                 {/* 1-Click Action Buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <div className="reminder-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                   {rem.customerPhone && (
                     <>
                       <button

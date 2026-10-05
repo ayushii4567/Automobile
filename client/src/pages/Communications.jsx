@@ -619,7 +619,7 @@ export default function Communications({ currentUser, customers = [], sales = []
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginTop: '18px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '14px', marginTop: '18px' }}>
               {/* Today's Birthdays */}
               {occasions.todaysBirthdays?.map(b => (
                 <div key={b.id} style={{ background: 'rgba(255, 255, 255, 0.95)', color: '#0f172a', padding: '16px', borderRadius: '10px' }}>

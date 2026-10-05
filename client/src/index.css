@@ -890,6 +890,16 @@ img {
     height: 60px !important;
   }
 
+  .header-search-wrap {
+    width: auto !important;
+  }
+
+  .user-profile-pill {
+    padding: 2px !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
   /* Responsive Grids collapse cleanly */
   .responsive-grid-2,
   .responsive-finance-grid,
@@ -930,6 +940,55 @@ img {
 
 /* ================= TABLET PORTRAIT / MID-SIZE (<= 768px) ================= */
 @media (max-width: 768px) {
+  /* Responsive Action Cards (Reminders, Test Drives, Communications, Appointments, etc.) */
+  .reminder-card,
+  .responsive-action-card,
+  .action-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding: 16px 14px !important;
+  }
+
+  .reminder-card > .reminder-content,
+  .reminder-card > div:first-child,
+  .responsive-action-card > div:first-child,
+  .action-card > div:first-child {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+
+  .reminder-card > .reminder-actions,
+  .reminder-card > div:last-child,
+  .responsive-action-card > div:last-child,
+  .action-card > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    margin-top: 4px !important;
+    justify-content: flex-start !important;
+  }
+
+  .reminder-card > .reminder-actions button,
+  .responsive-action-card > div:last-child button,
+  .action-card > div:last-child button {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-height: 40px !important;
+    justify-content: center !important;
+    font-size: 0.84rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .reminder-card > .reminder-actions button:first-child {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
+
   .app-footer {
     padding: 18px 0 12px 0;
     margin-top: 24px;
@@ -956,40 +1015,38 @@ img {
     display: flex !important;
   }
 
-  /* Universal Child Min-Width Reset: Prevent wide inline styles from breaking phone layout */
-  [style*="minWidth: '2"],
-  [style*="minWidth: \"2"],
-  [style*="min-width: 2"],
-  [style*="minWidth: '3"],
-  [style*="minWidth: \"3"],
-  [style*="min-width: 3"] {
-    min-width: 0 !important;
+  /* Prevent wide inline styles from breaking phone layout */
+  [style*="minWidth"],
+  [style*="min-width"] {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .app-main {
-    padding: 12px 12px !important;
+    padding: 12px 10px !important;
   }
 
   /* Compact Sticky Header on Phones */
   .header-container {
     height: 56px !important;
-    padding: 0 12px !important;
+    padding: 0 10px !important;
     gap: 8px !important;
   }
 
   .header-title-text {
-    font-size: clamp(0.92rem, 3.4vw, 1.05rem) !important;
-    max-width: clamp(110px, 34vw, 200px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: clamp(0.95rem, 3.8vw, 1.15rem) !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
   }
   .header-sub-text {
     display: none !important;
   }
 
   .header-search-wrap {
-    width: clamp(75px, 20vw, 130px) !important;
+    width: auto !important;
   }
 
   /* Mobile Popups: Search & Notifications open cleanly across screen width */
@@ -1176,7 +1233,7 @@ img {
 /* ================= SMALL PHONES (<= 480px) ================= */
 @media (max-width: 480px) {
   .app-main {
-    padding: 10px 10px !important;
+    padding: 10px 8px !important;
   }
 
   .header-container {
@@ -1185,12 +1242,19 @@ img {
   }
 
   .header-title-text {
-    font-size: 0.92rem !important;
-    max-width: 120px !important;
+    font-size: 0.95rem !important;
+    max-width: none !important;
   }
 
   .header-search-wrap {
-    width: clamp(65px, 18vw, 100px) !important;
+    width: auto !important;
+  }
+
+  .reminder-card > .reminder-actions button,
+  .responsive-action-card > div:last-child button,
+  .action-card > div:last-child button {
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 
   .btn {
@@ -1250,22 +1314,12 @@ img {
   }
 
   .header-title-text {
-    font-size: 0.84rem !important;
-    max-width: 95px !important;
+    font-size: 0.88rem !important;
+    max-width: none !important;
   }
 
   .header-search-wrap {
-    width: 55px !important;
-  }
-  .header-search-wrap input {
-    font-size: 0.72rem !important;
-    padding-left: 20px !important;
-    padding-right: 4px !important;
-  }
-  .header-search-wrap svg {
-    left: 4px !important;
-    width: 11px !important;
-    height: 11px !important;
+    width: auto !important;
   }
 
   /* On ultra-compact screens, KPI grid cleanly becomes 1 column */

@@ -182,7 +182,7 @@ export default function Dashboard({
       {lowStock.length > 0 && (
         <div style={{
           background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px',
-          padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px'
+          padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'
         }} className="animate-fade-in">
           <AlertTriangle size={18} color="#d97706" />
           <div style={{ flex: 1 }}>

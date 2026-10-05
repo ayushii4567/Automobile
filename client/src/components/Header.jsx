@@ -188,62 +188,85 @@ export default function Header({
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
         
         {/* Global Search Bar (Fluid & Responsive) */}
-        <div ref={searchRef} className="header-search-wrap" style={{ position: 'relative', width: 'clamp(100px, 14vw, 230px)', flexShrink: 1 }}>
-          <Search 
-            size={15} 
-            color="#94a3b8" 
-            style={{
-              position: 'absolute',
-              left: '11px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 2
-            }} 
-          />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery || ''}
-            onChange={(e) => {
-              if (setSearchQuery) setSearchQuery(e.target.value);
-              setSearchOpen(true);
-            }}
-            onFocus={() => setSearchOpen(true)}
-            className="form-input"
-            style={{
-              paddingLeft: '32px',
-              paddingRight: searchQuery ? '26px' : '10px',
-              height: '36px',
-              fontSize: '0.82rem',
-              borderRadius: '8px',
-              background: '#f8fafc',
-              borderColor: '#e2e8f0'
-            }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => {
-                if (setSearchQuery) setSearchQuery('');
-                setSearchOpen(false);
-              }}
+        <div ref={searchRef} className="header-search-wrap" style={{ position: 'relative', flexShrink: 0 }}>
+          {/* Desktop Search Input */}
+          <div className="hide-on-mobile" style={{ position: 'relative', width: 'clamp(120px, 15vw, 230px)' }}>
+            <Search 
+              size={15} 
+              color="#94a3b8" 
               style={{
                 position: 'absolute',
-                right: '8px',
+                left: '11px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#94a3b8',
-                padding: '4px'
+                zIndex: 2
+              }} 
+            />
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery || ''}
+              onChange={(e) => {
+                if (setSearchQuery) setSearchQuery(e.target.value);
+                setSearchOpen(true);
               }}
-            >
-              <X size={14} />
-            </button>
-          )}
+              onFocus={() => setSearchOpen(true)}
+              className="form-input"
+              style={{
+                paddingLeft: '32px',
+                paddingRight: searchQuery ? '26px' : '10px',
+                height: '36px',
+                fontSize: '0.82rem',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                borderColor: '#e2e8f0'
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  if (setSearchQuery) setSearchQuery('');
+                  setSearchOpen(false);
+                }}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#94a3b8',
+                  padding: '4px'
+                }}
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Search Icon Button */}
+          <button
+            onClick={() => setSearchOpen(o => !o)}
+            className="show-on-mobile btn btn-secondary btn-icon"
+            style={{
+              width: '36px',
+              height: '36px',
+              minWidth: '36px',
+              borderRadius: '8px',
+              padding: 0,
+              cursor: 'pointer',
+              background: searchOpen ? '#fee2e2' : '#f8fafc',
+              borderColor: searchOpen ? '#fca5a5' : '#e2e8f0'
+            }}
+            title="Search Showroom"
+            aria-label="Search Showroom"
+          >
+            <Search size={16} color={searchOpen ? '#ef4444' : '#475569'} />
+          </button>
 
           {/* Global Search Dropdown Overlay */}
-          {searchOpen && searchResults && (
+          {searchOpen && (
             <div style={{
               position: 'absolute',
               top: '46px',
@@ -256,19 +279,41 @@ export default function Header({
               zIndex: 150,
               overflow: 'hidden'
             }} className="header-search-dropdown animate-slide-up">
-              <div style={{
-                padding: '10px 14px',
-                background: '#f8fafc',
-                borderBottom: '1px solid #e2e8f0',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: '#64748b',
-                display: 'flex',
-                justifyContent: 'space-between'
-              }}>
-                <span>CROSS-SHOWROOM SEARCH</span>
-                <span>{searchResults.totalMatches} result(s)</span>
+              {/* Mobile Search Input Header */}
+              <div className="show-on-mobile" style={{ padding: '10px 12px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Search size={16} color="#94a3b8" />
+                <input
+                  type="text"
+                  placeholder="Search vehicles, clients, sales..."
+                  value={searchQuery || ''}
+                  onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
+                  autoFocus
+                  className="form-input"
+                  style={{ height: '36px', fontSize: '0.86rem', flex: 1 }}
+                />
+                <button
+                  onClick={() => setSearchOpen(false)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#64748b' }}
+                >
+                  <X size={18} />
+                </button>
               </div>
+
+              {searchResults && (
+                <div style={{
+                  padding: '10px 14px',
+                  background: '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}>
+                  <span>CROSS-SHOWROOM SEARCH</span>
+                  <span>{searchResults.totalMatches} result(s)</span>
+                </div>
+              )}
 
               <div style={{ maxHeight: '380px', overflowY: 'auto' }}>
                 {searchResults.totalMatches === 0 ? (
@@ -520,10 +565,10 @@ export default function Header({
         </div>
 
         {/* Subtle Divider */}
-        <div style={{ width: '1px', height: '22px', background: '#e2e8f0', margin: '0 2px' }} />
+        <div className="hide-on-mobile" style={{ width: '1px', height: '22px', background: '#e2e8f0', margin: '0 2px' }} />
 
         {/* User Profile Pill */}
-        <div style={{
+        <div className="user-profile-pill" style={{
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -542,11 +587,12 @@ export default function Header({
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '0.78rem',
-            fontWeight: 700
+            fontWeight: 700,
+            flexShrink: 0
           }}>
             {currentUser?.name ? currentUser.name.charAt(0) : 'U'}
           </div>
-          <div className="hide-on-phone" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a', lineHeight: 1.1 }}>
               {currentUser?.name || 'User'}
             </span>
@@ -562,6 +608,7 @@ export default function Header({
           {onLogout && (
             <button
               onClick={onLogout}
+              className="hide-on-mobile"
               title="Sign Out"
               style={{
                 marginLeft: '4px',

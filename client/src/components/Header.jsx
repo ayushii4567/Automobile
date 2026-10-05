@@ -137,8 +137,7 @@ export default function Header({
       zIndex: 30,
       width: '100%',
       maxWidth: '100%',
-      boxSizing: 'border-box',
-      overflow: 'hidden'
+      boxSizing: 'border-box'
     }}>
       {/* Left: Hamburger Menu (Mobile) & Title */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: '1 1 0', overflow: 'hidden' }}>
@@ -256,7 +255,7 @@ export default function Header({
               boxShadow: '0 12px 32px rgba(0, 0, 0, 0.14)',
               zIndex: 150,
               overflow: 'hidden'
-            }} className="animate-slide-up">
+            }} className="header-search-dropdown animate-slide-up">
               <div style={{
                 padding: '10px 14px',
                 background: '#f8fafc',
@@ -442,7 +441,7 @@ export default function Header({
               width: 'min(340px, calc(100vw - 32px))', background: '#fff',
               border: '1px solid #e5e7eb', borderRadius: '12px',
               boxShadow: '0 12px 32px rgba(0,0,0,0.14)', zIndex: 100, overflow: 'hidden'
-            }} className="animate-slide-up">
+            }} className="header-bell-dropdown animate-slide-up">
               <div style={{
                 padding: '12px 16px',
                 background: '#f8fafc',

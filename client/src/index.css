@@ -777,12 +777,13 @@ img {
 }
 
 /* Dealership Application Footer */
+/* Dealership Application Footer */
 .app-footer {
   margin-top: auto;
-  padding: 20px 0 8px 0;
+  padding: 22px 0 12px 0;
   border-top: 1px solid var(--border-color);
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   width: 100%;
   box-sizing: border-box;
 }
@@ -792,8 +793,9 @@ img {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   max-width: 100%;
+  width: 100%;
 }
 
 .footer-left, .footer-right {
@@ -806,10 +808,12 @@ img {
 .footer-brand {
   font-weight: 700;
   color: var(--text-secondary);
+  letter-spacing: 0.02em;
 }
 
 .footer-separator {
-  color: var(--border-color);
+  color: #cbd5e1;
+  user-select: none;
 }
 
 .footer-status {
@@ -817,7 +821,7 @@ img {
   align-items: center;
   gap: 6px;
   color: var(--success);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Visibility Utilities */
@@ -835,7 +839,7 @@ img {
   display: none !important;
 }
 
-/* TABLET & MOBILE BREAKPOINT (<= 900px) */
+/* ================= TABLET & MOBILE BREAKPOINT (<= 900px) ================= */
 @media (max-width: 900px) {
   .hide-on-mobile {
     display: none !important;
@@ -844,32 +848,47 @@ img {
     display: flex !important;
   }
 
-  /* Sidebar becomes off-canvas drawer — removed from flex flow */
+  /* Sidebar becomes smooth off-canvas drawer */
   .sidebar-container {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     height: 100%;
-    width: 280px;
+    width: min(290px, 86vw);
     min-width: 0;
     z-index: 1050;
     transform: translateX(-100%);
     box-shadow: none;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
   }
 
   .sidebar-container.mobile-open {
     transform: translateX(0);
-    box-shadow: 12px 0 36px rgba(0, 0, 0, 0.45);
+    box-shadow: 14px 0 45px rgba(0, 0, 0, 0.55);
   }
 
-  /* Main page layout */
+  /* Touch-friendly sidebar nav items */
+  .sidebar-nav-item {
+    padding: 9px 12px !important;
+    font-size: 0.86rem !important;
+    min-height: 40px;
+  }
+
+  /* Main page layout padding */
   .app-main,
   .main-content-layout {
     padding: 16px 18px !important;
   }
 
-  /* Responsive Grids collapse to single column without overflow */
+  .header-container {
+    padding: 0 16px !important;
+    height: 60px !important;
+  }
+
+  /* Responsive Grids collapse cleanly */
   .responsive-grid-2,
   .responsive-finance-grid,
   .responsive-split-2 {
@@ -886,14 +905,11 @@ img {
     width: 100% !important;
   }
 
-  .header-container {
-    padding: 0 16px !important;
-  }
-
-  /* Tables on mobile — force scroll */
+  /* Tables on mobile — smooth horizontal scroll */
   .data-table-wrapper,
   .table-responsive {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Prevent page-level overflow */
@@ -903,7 +919,6 @@ img {
     overflow-x: hidden;
   }
 
-  /* Reset app-shell gradient — no sidebar column on mobile */
   .app-shell {
     background: var(--bg-page);
     height: 100vh;
@@ -911,7 +926,26 @@ img {
   }
 }
 
-/* SMARTPHONE BREAKPOINT (<= 640px) */
+/* ================= TABLET PORTRAIT / MID-SIZE (<= 768px) ================= */
+@media (max-width: 768px) {
+  .app-footer {
+    padding: 18px 0 12px 0;
+    margin-top: 24px;
+  }
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+  .footer-left, .footer-right {
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+}
+
+/* ================= SMARTPHONE BREAKPOINT (<= 640px) ================= */
 @media (max-width: 640px) {
   .hide-on-phone {
     display: none !important;
@@ -924,6 +958,7 @@ img {
     padding: 12px 12px !important;
   }
 
+  /* Compact Sticky Header on Phones */
   .header-container {
     height: 56px !important;
     padding: 0 12px !important;
@@ -932,13 +967,28 @@ img {
 
   .header-title-text {
     font-size: 1rem !important;
+    max-width: 160px;
   }
   .header-sub-text {
     display: none !important;
   }
 
   .header-search-wrap {
-    width: clamp(85px, 22vw, 150px) !important;
+    width: clamp(80px, 20vw, 130px) !important;
+  }
+
+  /* Mobile Popups: Search & Notifications open cleanly across screen width */
+  .header-search-dropdown,
+  .header-bell-dropdown {
+    position: fixed !important;
+    top: 58px !important;
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    border-radius: 14px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22) !important;
+    z-index: 1200 !important;
   }
 
   .mobile-stack {
@@ -946,7 +996,7 @@ img {
     align-items: stretch !important;
   }
 
-  /* Force multi-column grids to collapse gracefully on phone */
+  /* Multi-column grids collapse gracefully */
   .responsive-grid-equal,
   .responsive-card-grid,
   div[style*="minmax(310px"],
@@ -963,12 +1013,18 @@ img {
     grid-column: 1 / -1 !important;
   }
 
+  /* KPI Cards: 2-column balanced grid on phones */
   .responsive-kpi-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
 
-  /* Modals on mobile devices — bottom sheet style */
+  .stat-card-value {
+    font-size: clamp(1.12rem, 3.8vw, 1.4rem) !important;
+    line-height: 1.2;
+  }
+
+  /* Modals on mobile devices — bottom sheet drawer style */
   .modal-overlay {
     padding: 0 !important;
     align-items: flex-end !important;
@@ -979,7 +1035,8 @@ img {
     width: 100% !important;
     max-width: 100% !important;
     max-height: 94vh !important;
-    border-radius: 16px 16px 0 0 !important;
+    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
   }
 
   .modal-header {
@@ -988,6 +1045,7 @@ img {
 
   .modal-body {
     padding: 14px 16px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .modal-footer {
@@ -996,7 +1054,7 @@ img {
     gap: 8px;
   }
 
-  /* Automatically collapse 2-column or 3-column modal form grids on mobile */
+  /* Collapse multi-column modal form fields on mobile */
   .modal-body div[style*="gridTemplateColumns"],
   .modal-body div[style*="grid-template-columns"],
   .modal-body div[style*="1fr 1fr"],
@@ -1013,12 +1071,12 @@ img {
     grid-column: 1 / -1 !important;
   }
 
-  /* iOS: prevent auto-zoom on input focus */
+  /* iOS input auto-zoom prevention */
   .form-input, .form-select, .form-textarea {
     font-size: 16px !important;
   }
 
-  /* Toast notification fits cleanly on small screens */
+  /* Toast notification on phone */
   .toast {
     top: 10px !important;
     right: 10px !important;
@@ -1031,7 +1089,6 @@ img {
     width: 100%;
   }
 
-  /* Card padding reduction */
   .glass-card {
     padding: 14px 12px !important;
     border-radius: var(--radius-md);
@@ -1039,7 +1096,6 @@ img {
     max-width: 100% !important;
   }
 
-  /* Table font size on phones */
   .data-table th,
   .data-table td {
     padding: 8px 10px;
@@ -1049,7 +1105,6 @@ img {
     min-width: 0 !important;
   }
 
-  /* Stack control bars cleanly */
   .control-bar {
     flex-direction: column;
     align-items: stretch;
@@ -1057,13 +1112,9 @@ img {
   .control-bar-left {
     width: 100%;
   }
-
-  .stat-card-value {
-    font-size: 1.45rem;
-  }
 }
 
-/* SMALL PHONES (<= 480px) */
+/* ================= SMALL PHONES (<= 480px) ================= */
 @media (max-width: 480px) {
   .app-main {
     padding: 10px 10px !important;
@@ -1076,20 +1127,43 @@ img {
 
   .header-title-text {
     font-size: 0.92rem !important;
+    max-width: 130px;
   }
 
   .header-search-wrap {
-    width: clamp(75px, 20vw, 120px) !important;
+    width: clamp(70px, 18vw, 105px) !important;
   }
 
   .btn {
-    padding: 6px 12px;
+    padding: 6px 10px;
     font-size: 0.8rem;
     gap: 5px;
   }
+
+  /* Footer on small phones: clean vertical stack, no awkward wrapping */
+  .app-footer {
+    padding: 16px 0 10px 0;
+    margin-top: 20px;
+  }
+  .footer-content {
+    gap: 6px;
+  }
+  .footer-separator {
+    display: none !important;
+  }
+  .footer-left {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .footer-right {
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.72rem;
+    color: #94a3b8;
+  }
 }
 
-/* EXTRA SMALL PHONES (<= 360px & 320px) */
+/* ================= EXTRA SMALL PHONES (<= 360px & 320px) ================= */
 @media (max-width: 360px) {
   .app-main {
     padding: 8px 6px !important;
@@ -1102,24 +1176,26 @@ img {
 
   .header-title-text {
     font-size: 0.84rem !important;
+    max-width: 100px;
   }
 
   .header-search-wrap {
-    width: 65px !important;
+    width: 60px !important;
   }
   .header-search-wrap input {
     font-size: 0.72rem !important;
-    padding-left: 24px !important;
-    padding-right: 6px !important;
+    padding-left: 22px !important;
+    padding-right: 4px !important;
   }
   .header-search-wrap svg {
-    left: 6px !important;
-    width: 12px !important;
-    height: 12px !important;
+    left: 5px !important;
+    width: 11px !important;
+    height: 11px !important;
   }
 
   .responsive-kpi-grid {
     grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 
   .stat-card-value {

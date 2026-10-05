@@ -31,44 +31,50 @@ export default function StatCard({
         justifyContent: 'space-between'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-        <div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px' }}>
+        <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
           <div style={{
             fontSize: '0.8rem',
             fontWeight: 500,
-            color: '#64748b'
+            color: '#64748b',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}>
             {title}
           </div>
-          <div className="stat-card-value">
+          <div className="stat-card-value" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={String(value)}>
             {value}
           </div>
         </div>
 
         {Icon && (
           <div style={{
-            width: '42px',
-            height: '42px',
+            width: '40px',
+            height: '40px',
+            minWidth: '40px',
             borderRadius: '8px',
             background: styleConfig.bg,
             border: `1px solid ${styleConfig.border}`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: styleConfig.color
+            color: styleConfig.color,
+            flexShrink: 0
           }}>
-            <Icon size={20} />
+            <Icon size={18} />
           </div>
         )}
       </div>
 
       {(subtitle || trend) && (
         <div style={{
-          marginTop: '14px',
+          marginTop: '12px',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          fontSize: '0.78rem'
+          fontSize: '0.78rem',
+          flexWrap: 'wrap'
         }}>
           {trend && (
             <span style={{

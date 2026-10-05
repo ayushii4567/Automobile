@@ -134,6 +134,7 @@ export default function Sidebar({
                   setActiveTab(item.id);
                   if (onCloseMobile) onCloseMobile();
                 }}
+                className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -251,20 +252,21 @@ export default function Sidebar({
 
           <button
             onClick={onCloseMobile}
-            className="show-on-mobile"
+            className="show-on-mobile sidebar-close-btn"
             style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: 'none',
-              borderRadius: '6px',
-              color: '#9ca3af',
-              width: '32px',
-              height: '32px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '8px',
+              color: '#f8fafc',
+              width: '36px',
+              height: '36px',
               cursor: 'pointer',
               alignItems: 'center',
               justifyContent: 'center',
               padding: 0
             }}
             title="Close Menu"
+            aria-label="Close Navigation Menu"
           >
             <X size={18} />
           </button>

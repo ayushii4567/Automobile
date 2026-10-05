@@ -1128,6 +1128,7 @@ export default function App() {
           currentUser={currentUser}
           onLogout={handleLogout}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)}
           lowStockCount={vehicles.filter(v => Number(v.stock) <= 1 && v.status === 'Available').length}
           pendingTestDrivesCount={testdrives.filter(t => t.status === 'Scheduled').length}
           openTicketsCount={services.filter(s => s.status !== 'Completed').length}

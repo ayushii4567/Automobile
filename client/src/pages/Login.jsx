@@ -62,7 +62,7 @@ export default function Login({ onLogin }) {
   };
 
   return (
-    <div style={{
+    <div className="login-container" style={{
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
@@ -128,7 +128,7 @@ export default function Login({ onLogin }) {
         </div>
 
         {/* Main Card */}
-        <div style={{
+        <div className="login-card" style={{
           background: 'rgba(17, 24, 39, 0.85)',
           backdropFilter: 'blur(20px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -162,7 +162,7 @@ export default function Login({ onLogin }) {
               Select Access Role (1-Click Switch)
             </label>
 
-            <div style={{
+            <div className="login-role-grid" style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '10px'

@@ -863,18 +863,20 @@ img {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
   }
 
   .sidebar-container.mobile-open {
     transform: translateX(0);
-    box-shadow: 14px 0 45px rgba(0, 0, 0, 0.55);
+    box-shadow: 16px 0 48px rgba(0, 0, 0, 0.6);
   }
 
   /* Touch-friendly sidebar nav items */
   .sidebar-nav-item {
-    padding: 9px 12px !important;
+    padding: 10px 14px !important;
     font-size: 0.86rem !important;
-    min-height: 40px;
+    min-height: 42px;
   }
 
   /* Main page layout padding */
@@ -936,7 +938,7 @@ img {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
+    gap: 8px;
   }
   .footer-left, .footer-right {
     justify-content: center;
@@ -954,6 +956,16 @@ img {
     display: flex !important;
   }
 
+  /* Universal Child Min-Width Reset: Prevent wide inline styles from breaking phone layout */
+  [style*="minWidth: '2"],
+  [style*="minWidth: \"2"],
+  [style*="min-width: 2"],
+  [style*="minWidth: '3"],
+  [style*="minWidth: \"3"],
+  [style*="min-width: 3"] {
+    min-width: 0 !important;
+  }
+
   .app-main {
     padding: 12px 12px !important;
   }
@@ -966,15 +978,18 @@ img {
   }
 
   .header-title-text {
-    font-size: 1rem !important;
-    max-width: 160px;
+    font-size: clamp(0.92rem, 3.4vw, 1.05rem) !important;
+    max-width: clamp(110px, 34vw, 200px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .header-sub-text {
     display: none !important;
   }
 
   .header-search-wrap {
-    width: clamp(80px, 20vw, 130px) !important;
+    width: clamp(75px, 20vw, 130px) !important;
   }
 
   /* Mobile Popups: Search & Notifications open cleanly across screen width */
@@ -985,9 +1000,9 @@ img {
     left: 8px !important;
     right: 8px !important;
     width: auto !important;
-    max-width: none !important;
+    max-width: calc(100vw - 16px) !important;
     border-radius: 14px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25) !important;
     z-index: 1200 !important;
   }
 
@@ -996,15 +1011,22 @@ img {
     align-items: stretch !important;
   }
 
-  /* Multi-column grids collapse gracefully */
-  .responsive-grid-equal,
-  .responsive-card-grid,
+  /* All 3+ column inline grids collapse to 1 column on phone */
+  div[style*="1fr 1fr 1fr"],
+  div[style*="repeat(3"],
+  div[style*="repeat(4"],
   div[style*="minmax(310px"],
   div[style*="minmax(320px"],
   div[style*="minmax(330px"],
   div[style*="minmax(300px"],
   div[style*="minmax(280px"],
-  div[style*="minmax(260px"] {
+  div[style*="minmax(260px"],
+  div[style*="minmax(250px"],
+  div[style*="minmax(240px"],
+  div[style*="minmax(220px"],
+  div[style*="minmax(210px"],
+  .responsive-grid-equal,
+  .responsive-card-grid {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
@@ -1022,6 +1044,9 @@ img {
   .stat-card-value {
     font-size: clamp(1.12rem, 3.8vw, 1.4rem) !important;
     line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* Modals on mobile devices — bottom sheet drawer style */
@@ -1036,7 +1061,7 @@ img {
     max-width: 100% !important;
     max-height: 94vh !important;
     border-radius: 18px 18px 0 0 !important;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.28) !important;
   }
 
   .modal-header {
@@ -1112,6 +1137,40 @@ img {
   .control-bar-left {
     width: 100%;
   }
+
+  /* Touch-friendly tab bars and chip rows */
+  .filter-chip-row,
+  div[style*="overflowX: 'auto'"],
+  div[style*="overflow-x: auto"] {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .filter-chip-row::-webkit-scrollbar,
+  div[style*="overflowX: 'auto'"]::-webkit-scrollbar,
+  div[style*="overflow-x: auto"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Printable invoice/receipt preview on phone */
+  .printable-invoice,
+  .printable-receipt {
+    padding: 14px 12px !important;
+  }
+  .printable-invoice > div:first-child > div:last-child,
+  .printable-receipt > div:first-child > div:last-child {
+    text-align: left !important;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* Responsive Login View */
+  .login-container {
+    padding: 16px !important;
+  }
+  .login-card {
+    padding: 22px 18px !important;
+    border-radius: 16px !important;
+  }
 }
 
 /* ================= SMALL PHONES (<= 480px) ================= */
@@ -1127,11 +1186,11 @@ img {
 
   .header-title-text {
     font-size: 0.92rem !important;
-    max-width: 130px;
+    max-width: 120px !important;
   }
 
   .header-search-wrap {
-    width: clamp(70px, 18vw, 105px) !important;
+    width: clamp(65px, 18vw, 100px) !important;
   }
 
   .btn {
@@ -1140,13 +1199,22 @@ img {
     gap: 5px;
   }
 
+  /* Collapse 2-column detail sections outside KPI cards on small phones */
+  div[style*="1fr 1fr"]:not(.responsive-kpi-grid):not(.header-search-wrap),
+  div[style*="1fr 1.5fr"],
+  div[style*="1.5fr 1fr"],
+  div[style*="1fr 2fr"],
+  div[style*="2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
   /* Footer on small phones: clean vertical stack, no awkward wrapping */
   .app-footer {
     padding: 16px 0 10px 0;
     margin-top: 20px;
   }
   .footer-content {
-    gap: 6px;
+    gap: 5px;
   }
   .footer-separator {
     display: none !important;
@@ -1160,6 +1228,13 @@ img {
     gap: 3px;
     font-size: 0.72rem;
     color: #94a3b8;
+  }
+
+  .login-container {
+    padding: 12px 10px !important;
+  }
+  .login-card {
+    padding: 18px 14px !important;
   }
 }
 
@@ -1176,23 +1251,24 @@ img {
 
   .header-title-text {
     font-size: 0.84rem !important;
-    max-width: 100px;
+    max-width: 95px !important;
   }
 
   .header-search-wrap {
-    width: 60px !important;
+    width: 55px !important;
   }
   .header-search-wrap input {
     font-size: 0.72rem !important;
-    padding-left: 22px !important;
+    padding-left: 20px !important;
     padding-right: 4px !important;
   }
   .header-search-wrap svg {
-    left: 5px !important;
+    left: 4px !important;
     width: 11px !important;
     height: 11px !important;
   }
 
+  /* On ultra-compact screens, KPI grid cleanly becomes 1 column */
   .responsive-kpi-grid {
     grid-template-columns: 1fr !important;
     gap: 8px !important;
@@ -1216,6 +1292,17 @@ img {
   .badge {
     font-size: 0.68rem !important;
     padding: 2px 5px !important;
+  }
+
+  .login-container {
+    padding: 8px 6px !important;
+  }
+  .login-card {
+    padding: 16px 10px !important;
+  }
+  .login-role-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 }
 

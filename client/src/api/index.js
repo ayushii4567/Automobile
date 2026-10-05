@@ -32,8 +32,13 @@ function getLocal(key, fallback) {
     const item = localStorage.getItem(`autocore_${key}`);
     if (!item) return fallback;
     const parsed = JSON.parse(item);
-    // Auto-upgrade if cached item is empty or only had minimal 2 records while fallback has full seed
-    if (Array.isArray(fallback) && Array.isArray(parsed) && fallback.length > 2 && parsed.length <= 2) {
+    // Auto-upgrade if fallback is array and has more records than currently cached
+    if (Array.isArray(fallback) && Array.isArray(parsed) && fallback.length > parsed.length) {
+      setLocal(key, fallback);
+      return fallback;
+    }
+    // Auto-upgrade if fallback is object with totalReminders > cached
+    if (fallback && typeof fallback === 'object' && fallback.totalReminders && (!parsed || !parsed.totalReminders || parsed.totalReminders < fallback.totalReminders)) {
       setLocal(key, fallback);
       return fallback;
     }
@@ -336,7 +341,7 @@ export const api = {
     };
   }),
 
-  getAuditLogs: () => request('/audit-logs', {}, () => getLocal('audit-logs', [])),
+  getAuditLogs: () => request('/audit-logs', {}, () => getLocal('auditLogs', initialData.auditLogs || [])),
 
   // Settings & Dealership Info
   getSettings: () => request('/settings', {}, () => getLocal('settings', initialData.settings || {})),
@@ -344,8 +349,8 @@ export const api = {
     setLocal('settings', data);
     return data;
   }),
-  getDealershipProfile: () => request('/dealership-profile', {}, () => getLocal('settings', initialData.settings || {})),
-  getDealershipSettings: () => request('/dealership-settings', {}, () => getLocal('settings', initialData.settings || {})),
+  getDealershipProfile: () => request('/dealership-profile', {}, () => getLocal('dealershipProfile', initialData.dealershipProfile || initialData.settings || {})),
+  getDealershipSettings: () => request('/dealership-settings', {}, () => getLocal('dealershipSettings', initialData.dealershipSettings || initialData.settings || {})),
   uploadLogo: async (file) => {
     if (isOfflineMode) {
       return { success: true, logoUrl: '/logo.png' };
@@ -507,11 +512,11 @@ export const api = {
   deleteFeedback: feedbackCrud.delete,
 
   // Invoices & Receipts
-  getInvoices: () => request('/invoices', {}, () => getLocal('invoices', [])),
-  getPendingInvoices: () => request('/invoices/pending', {}, () => []),
-  getInvoiceById: (id) => request(`/invoices/${id}`, {}, () => null),
-  getReceipts: () => request('/receipts', {}, () => getLocal('receipts', [])),
-  getReceiptById: (id) => request(`/receipts/${id}`, {}, () => null),
+  getInvoices: () => request('/invoices', {}, () => getLocal('invoices', initialData.invoices || [])),
+  getPendingInvoices: () => request('/invoices/pending', {}, () => (initialData.invoices || []).filter(i => i.status !== 'Paid')),
+  getInvoiceById: (id) => request(`/invoices/${id}`, {}, () => (initialData.invoices || []).find(inv => inv.id === id) || null),
+  getReceipts: () => request('/receipts', {}, () => getLocal('receipts', initialData.receipts || [])),
+  getReceiptById: (id) => request(`/receipts/${id}`, {}, () => (initialData.receipts || []).find(r => r.id === id) || null),
 
   // Payroll & Expenses
   getPayroll: (params = '') => request(`/payroll${params ? '?' + params : ''}`, {}, () => getLocal('payroll', initialData.payroll || [])),
@@ -528,75 +533,70 @@ export const api = {
   getExpenseSummary: () => request('/expenses/summary', {}, () => ({ total: 0, categories: {} })),
 
   // Service Workflow
-  getJobCards: () => request('/job-cards', {}, () => getLocal('job-cards', [])),
+  getJobCards: () => request('/job-cards', {}, () => getLocal('jobCards', initialData.jobCards || [])),
   allocateJobCardParts: (id, parts) => request(`/job-cards/${id}/allocate-parts`, { method: 'POST', body: JSON.stringify({ parts }) }, () => ({ success: true })),
   getVehicleServiceHistory: (vin) => request(`/services/history/vehicle/${encodeURIComponent(vin)}`, {}, () => []),
 
   // Financial Reports
   getReportsSummary: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/financial-summary${qs ? '?' + qs : ''}`, {}, () => {
-      const sales = getLocal('sales', initialData.sales || []);
-      const totalRev = sales.reduce((sum, s) => sum + (Number(s.totalAmount) || 0), 0);
-      return {
-        totalSales: sales.length,
-        totalRevenue: totalRev,
-        salesByMonth: [],
-        categoryBreakdown: []
-      };
+    return request(`/reports/financial-summary${qs ? '?' + qs : ''}`, {}, () => initialData.financialSummary || {
+      pnl: initialData.profitAndLoss,
+      balanceSheet: initialData.balanceSheet,
+      invCap: initialData.inventoryCapital,
+      deptRev: initialData.departmentRevenue
     });
   },
   getFinancialSummary: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/financial-summary${qs ? '?' + qs : ''}`, {}, () => ({
-      totalSales: 0,
-      totalRevenue: 0,
-      salesByMonth: [],
-      categoryBreakdown: []
-    }));
+    return request(`/reports/financial-summary${qs ? '?' + qs : ''}`, {}, () => initialData.financialSummary || {});
   },
   getSalesReport: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/sales${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/sales${qs ? '?' + qs : ''}`, {}, () => initialData.sales || []);
   },
   getRevenueReport: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/revenue${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/revenue${qs ? '?' + qs : ''}`, {}, () => initialData.sales || []);
   },
   getPaymentsIn: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/payments-in${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/payments-in${qs ? '?' + qs : ''}`, {}, () => initialData.payments || []);
   },
   getPaymentsOut: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/payments-out${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/payments-out${qs ? '?' + qs : ''}`, {}, () => initialData.expenses || []);
   },
   getExpenseReport: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/expenses${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/expenses${qs ? '?' + qs : ''}`, {}, () => initialData.expenses || []);
   },
   getPartyLedger: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/party-ledger${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/party-ledger${qs ? '?' + qs : ''}`, {}, () => initialData.payments || []);
   },
   getProfitAndLoss: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/profit-and-loss${qs ? '?' + qs : ''}`, {}, () => ({ revenue: 0, expenses: 0, netProfit: 0 }));
+    return request(`/reports/profit-and-loss${qs ? '?' + qs : ''}`, {}, () => initialData.profitAndLoss || {});
   },
-  getBalanceSheet: () => request('/reports/balance-sheet', {}, () => ({ assets: [], liabilities: [], equity: [] })),
+  getBalanceSheet: () => request('/reports/balance-sheet', {}, () => initialData.balanceSheet || {}),
   getTaxGstReport: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
-    return request(`/reports/tax-gst${qs ? '?' + qs : ''}`, {}, () => []);
+    return request(`/reports/tax-gst${qs ? '?' + qs : ''}`, {}, () => initialData.invoices || []);
   },
-  getInventoryCapital: () => request('/reports/inventory-capital', {}, () => ({ totalCapital: 0, vehicleCount: 0 })),
-  getDepartmentRevenue: () => request('/reports/department-revenue', {}, () => []),
+  getInventoryCapital: () => request('/reports/inventory-capital', {}, () => initialData.inventoryCapital || {}),
+  getDepartmentRevenue: () => request('/reports/department-revenue', {}, () => initialData.departmentRevenue || {}),
   getExportCsvUrl: (reportType = 'sales', params = {}) => {
     const qs = new URLSearchParams({ reportType, ...params }).toString();
     return `/api/reports/export-csv?${qs}`;
   },
 
   // Communications & Campaigns
-  getGatewayStatus: () => request('/communications/gateway-status', {}, () => ({ status: 'online', provider: 'AutoSMS Gateway', balance: 5000 })),
+  getGatewayStatus: () => request('/communications/gateway-status', {}, () => initialData.gatewayStatus || {
+    whatsapp: { status: 'Connected', balance: 'Unlimited', provider: 'Meta Cloud API' },
+    email: { status: 'Connected', provider: 'SendGrid Enterprise' },
+    sms: { status: 'Connected', balance: 5000, provider: 'AutoSMS Gateway' }
+  }),
   dispatchCommunication: (data) => request('/communications/send', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, messageId: `msg-${Date.now()}` })),
   getCommunicationTemplates: (type, data = {}) => {
     const qs = new URLSearchParams({ type, ...data }).toString();
@@ -606,40 +606,90 @@ export const api = {
       whatsapp: 'Hello! Here is your latest vehicle update from Apex Horizon.'
     }));
   },
-  getOccasions: (date = '2026-10-03') => request(`/communications/occasions?date=${date}`, {}, () => []),
-  getCampaigns: () => request('/campaigns', {}, () => getLocal('campaigns', [])),
+  getOccasions: (date = '2026-10-03') => request(`/communications/occasions?date=${date}`, {}, () => initialData.occasions || {
+    today: '2026-10-03',
+    todaysBirthdays: [
+      { id: 'cust_01', name: 'Rahul Sharma', phone: '+91 98201 11223', email: 'rahul.sharma@gmail.com', dob: '1988-10-03', vehiclePurchased: 'BMW 3 Series Gran Limousine' }
+    ],
+    upcomingBirthdays: [],
+    todaysAnniversaries: [],
+    upcomingAnniversaries: []
+  }),
+  getCampaigns: () => request('/campaigns', {}, () => getLocal('campaigns', initialData.campaigns || [])),
   createCampaign: (data) => request('/campaigns', { method: 'POST', body: JSON.stringify(data) }, () => {
-    const list = getLocal('campaigns', []);
+    const list = getLocal('campaigns', initialData.campaigns || []);
     const item = { ...data, id: `cmp-${Date.now()}` };
     setLocal('campaigns', [item, ...list]);
     return item;
   }),
   updateCampaign: (id, data) => request(`/campaigns/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => {
-    const list = getLocal('campaigns', []);
+    const list = getLocal('campaigns', initialData.campaigns || []);
     const updated = list.map(c => c.id === id ? { ...c, ...data } : c);
     setLocal('campaigns', updated);
     return updated.find(c => c.id === id) || data;
   }),
   deleteCampaign: (id) => request(`/campaigns/${id}`, { method: 'DELETE' }, () => {
-    const list = getLocal('campaigns', []);
+    const list = getLocal('campaigns', initialData.campaigns || []);
     setLocal('campaigns', list.filter(c => c.id !== id));
     return { success: true };
   }),
   broadcastCampaign: (id, data) => request(`/campaigns/${id}/broadcast`, { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
-  getCustomerGroups: () => request('/customer-groups', {}, () => [
+  getCustomerGroups: () => request('/customer-groups', {}, () => initialData.customerGroups || [
     { id: 'grp-1', name: 'VIP Buyers', count: 12 },
-    { id: 'grp-2', name: 'Service Due', count: 8 },
-    { id: 'grp-3', name: 'Recent Leads', count: 15 }
+    { id: 'grp-2', name: 'Service Due (Immediate)', count: 8 },
+    { id: 'grp-3', name: 'Hot Leads & Test Drive Done', count: 15 },
+    { id: 'grp-4', name: 'Insurance Expiring Soon', count: 4 },
+    { id: 'grp-5', name: 'High-Net-Worth Corporate Accounts', count: 6 }
   ]),
 
   // Reminders & Alerts
-  getAutomatedReminders: (date = '2026-10-03') => request(`/reminders/automated?date=${date}`, {}, () => ({
-    count: 0,
-    serviceDue: [],
-    insuranceDue: [],
-    followUps: []
-  })),
-  getReminders: () => request('/reminders', {}, () => getLocal('reminders', [])),
+  getAutomatedReminders: (date = '2026-10-03') => request(`/reminders/automated?date=${date}`, {}, () => {
+    return getLocal('automatedReminders', initialData.automatedReminders || {
+      today: '2026-10-03',
+      totalReminders: 71,
+      urgentCount: 2,
+      highCount: 32,
+      byCategory: {
+        payment: 11,
+        insurance: 3,
+        service: 12,
+        lead: 2,
+        testDrive: 1,
+        delivery: 20,
+        birthday: 3,
+        anniversary: 19
+      },
+      reminders: []
+    });
+  }),
+  getReminders: () => request('/reminders', {}, () => {
+    return getLocal('fullReminders', initialData.fullReminders || {
+      manualReminders: [
+        {
+          id: 'rem-man-1',
+          title: 'Follow up with Amit Patil for Creta exchange valuation',
+          description: 'Client requested revised exchange bonus calculation for his 2020 Creta.',
+          category: 'Lead Follow-up',
+          priority: 'High',
+          due_date: '2026-10-04',
+          status: 'Pending',
+          created_by: 'Marcus Vance'
+        },
+        {
+          id: 'rem-man-2',
+          title: 'Schedule HDFC Loan Document Signing for Rahul Sharma',
+          description: 'Collect signed ECS mandate and loan agreement for BMW 3 Series delivery.',
+          category: 'Payment',
+          priority: 'Urgent',
+          due_date: '2026-10-03',
+          status: 'Pending',
+          created_by: 'Priya Patel'
+        }
+      ],
+      automatedReminders: initialData.automatedReminders || {},
+      summary: { total: 73, manualCount: 2, automatedCount: 71 }
+    });
+  }),
   createReminder: (data) => request('/reminders', { method: 'POST', body: JSON.stringify(data) }, () => {
     const list = getLocal('reminders', []);
     const item = { ...data, id: `rem-${Date.now()}` };
@@ -662,12 +712,14 @@ export const api = {
   getDocuments: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return request(`/documents${qs ? '?' + qs : ''}`, {}, () => {
-      const docs = getLocal('documents', [
+      const docObj = initialData.documents || { documents: [], stats: {} };
+      const rawDocs = docObj.documents || (Array.isArray(docObj) ? docObj : []);
+      const docs = getLocal('documents', rawDocs.length ? rawDocs : [
         {
           id: 'doc-1',
           title: 'Customer KYC - Rahul Sharma Aadhar Card',
           entity_type: 'CUSTOMER',
-          entity_id: 'cust-1',
+          entity_id: 'cust_01',
           doc_type: 'CUSTOMER_KYC',
           file_name: 'aadhar_rahul_sharma.pdf',
           file_size: 245000,
@@ -675,11 +727,11 @@ export const api = {
         },
         {
           id: 'doc-2',
-          title: 'Vehicle Registration - Tata Safari RC Copy',
+          title: 'Vehicle Registration - BMW 3 Series RC Copy',
           entity_type: 'VEHICLE',
-          entity_id: 'veh-2',
+          entity_id: 'veh_01',
           doc_type: 'RC_COPY',
-          file_name: 'rc_safari_dark.pdf',
+          file_name: 'rc_bmw_3series.pdf',
           file_size: 512000,
           created_at: '2026-09-17 14:10:00'
         }
@@ -693,11 +745,9 @@ export const api = {
       });
       return {
         documents: filtered,
-        stats: {
-          total: docs.length,
-          customerDocs: docs.filter(d => d.entity_type === 'CUSTOMER').length,
-          vehicleDocs: docs.filter(d => d.entity_type === 'VEHICLE').length,
-          saleDocs: docs.filter(d => d.entity_type === 'SALE').length
+        stats: docObj.stats || {
+          totalDocuments: docs.length,
+          totalSizeMB: 12.4
         }
       };
     });
@@ -755,19 +805,11 @@ export const api = {
   }),
   getDocumentPreviewUrl: (id) => `${API_BASE}/documents/preview/${id}`,
   getDocumentDownloadUrl: (id) => `${API_BASE}/documents/download/${id}`,
-  getDocumentStats: () => request('/documents-stats', {}, () => {
-    const docs = getLocal('documents', []);
-    return {
-      total: docs.length,
-      customerDocs: docs.filter(d => d.entity_type === 'CUSTOMER').length,
-      vehicleDocs: docs.filter(d => d.entity_type === 'VEHICLE').length,
-      saleDocs: docs.filter(d => d.entity_type === 'SALE').length
-    };
-  }),
+  getDocumentStats: () => request('/documents-stats', {}, () => initialData.documentStats || { totalDocuments: 10, totalSizeMB: 8.5 }),
 
   // Backup & Data Management
-  getBackup: () => request('/backup', {}, () => ({ backups: [], totalBackups: 0, lastBackup: '2026-10-03 12:00:00' })),
-  getBackupHealth: () => request('/backup/health', {}, () => ({ status: 'Healthy', database: 'SQLite (Mock/Local)', integrity: 'OK' })),
+  getBackup: () => request('/backup', {}, () => initialData.backup || { backups: [], totalBackups: 0, lastBackup: '2026-10-03 12:00:00' }),
+  getBackupHealth: () => request('/backup/health', {}, () => initialData.backupHealth || { status: 'Healthy', database: 'SQLite (Mock/Local)', integrity: 'OK' }),
   createBackup: (data = {}) => request('/backup', { method: 'POST', body: JSON.stringify(data) }, () => ({
     success: true,
     filename: `backup_${Date.now()}.sqlite`

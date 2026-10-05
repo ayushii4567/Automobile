@@ -173,12 +173,23 @@ router.get('/dashboard', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIV
     value: categoryMap[k]
   }));
 
-  const lowStock = vehicles.filter(v => (v.stock_quantity || 0) <= 2).map(v => ({
-    id: v.id,
-    name: `${v.brand} ${v.model}`,
-    stock: v.stock_quantity,
-    vin: v.vin
-  }));
+  const lowStockMap = {};
+  vehicles.forEach(v => {
+    if (v.status === 'Available' && (v.stock_quantity || 0) <= 2) {
+      const name = `${v.brand} ${v.model}`;
+      if (!lowStockMap[name]) {
+        lowStockMap[name] = {
+          id: v.id,
+          brand: v.brand,
+          model: v.model,
+          name: name,
+          stock: v.stock_quantity,
+          vin: v.vin
+        };
+      }
+    }
+  });
+  const lowStock = Object.values(lowStockMap);
 
   res.json({
     kpi: {
@@ -2333,6 +2344,253 @@ router.delete('/insurance/:id', authenticateToken, requireRole('ADMIN'), (req, r
   db.prepare('DELETE FROM insurance_policies WHERE id = ?').run(req.params.id);
   recordAudit(db, req.user, 'DELETE', 'INSURANCE', `Deleted insurance policy ${current.policy_number}`, req.params.id);
   res.json({ success: true, message: `Policy ${current.policy_number} deleted.` });
+});
+
+// ============================================================================
+// NEW: PDI & TRADE-INS
+// ============================================================================
+
+router.get('/pdi', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const pdis = db.prepare('SELECT * FROM pdi_records ORDER BY created_at DESC').all();
+  res.json(pdis.map(row => ({
+    id: row.id,
+    pdiNo: row.pdi_number,
+    saleId: row.sale_id,
+    invoiceNo: row.invoice_no,
+    vehicleName: row.vehicle_name,
+    vin: row.vin,
+    customerName: row.customer_name,
+    inspectorName: row.inspector_name,
+    inspectionDate: row.inspection_date,
+    exteriorStatus: row.exterior_status,
+    interiorStatus: row.interior_status,
+    engineFluidsStatus: row.engine_fluids_status,
+    electricalsStatus: row.electricals_status,
+    toolkitProvided: Boolean(row.toolkit_provided),
+    keysProvided: Number(row.keys_provided),
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  })));
+});
+
+router.post('/pdi', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const id = req.body.id || `pdi_${Date.now()}`;
+  const totalCount = db.prepare('SELECT count(*) as c FROM pdi_records').get().c + 1;
+  const pdiNo = req.body.pdiNo || `PDI-2026-${String(totalCount).padStart(3, '0')}`;
+
+  db.prepare(`
+    INSERT INTO pdi_records (
+      id, pdi_number, sale_id, invoice_no, vehicle_name, vin, customer_name,
+      inspector_name, inspection_date, exterior_status, interior_status,
+      engine_fluids_status, electricals_status, toolkit_provided, keys_provided,
+      status, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id, pdiNo, req.body.saleId || null, req.body.invoiceNo || null,
+    req.body.vehicleName || 'Unknown Vehicle', req.body.vin || 'VIN-TBD',
+    req.body.customerName || 'Unknown Customer',
+    req.body.inspectorName || 'Inspector',
+    req.body.inspectionDate || new Date().toISOString().split('T')[0],
+    req.body.exteriorStatus || 'Passed', req.body.interiorStatus || 'Passed',
+    req.body.engineFluidsStatus || 'Passed', req.body.electricalsStatus || 'Passed',
+    req.body.toolkitProvided ? 1 : 0, Number(req.body.keysProvided || 2),
+    req.body.status || 'Passed', req.body.notes || ''
+  );
+  recordAudit(db, req.user, 'CREATE', 'PDI', `Created PDI inspection ${pdiNo}`, id);
+  const created = db.prepare('SELECT * FROM pdi_records WHERE id = ?').get(id);
+  res.status(201).json({
+    id: created.id,
+    pdiNo: created.pdi_number,
+    saleId: created.sale_id,
+    invoiceNo: created.invoice_no,
+    vehicleName: created.vehicle_name,
+    vin: created.vin,
+    customerName: created.customer_name,
+    inspectorName: created.inspector_name,
+    inspectionDate: created.inspection_date,
+    exteriorStatus: created.exterior_status,
+    interiorStatus: created.interior_status,
+    engineFluidsStatus: created.engine_fluids_status,
+    electricalsStatus: created.electricals_status,
+    toolkitProvided: Boolean(created.toolkit_provided),
+    keysProvided: Number(created.keys_provided),
+    status: created.status,
+    notes: created.notes,
+    createdAt: created.created_at,
+    updatedAt: created.updated_at
+  });
+});
+
+router.put('/pdi/:id', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const current = db.prepare('SELECT * FROM pdi_records WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'PDI record not found' });
+  
+  db.prepare(`
+    UPDATE pdi_records SET
+      inspector_name = ?, inspection_date = ?, exterior_status = ?, interior_status = ?,
+      engine_fluids_status = ?, electricals_status = ?, toolkit_provided = ?, keys_provided = ?,
+      status = ?, notes = ?, updated_at = datetime('now')
+    WHERE id = ?
+  `).run(
+    req.body.inspectorName || current.inspector_name,
+    req.body.inspectionDate || current.inspection_date,
+    req.body.exteriorStatus || current.exterior_status,
+    req.body.interiorStatus || current.interior_status,
+    req.body.engineFluidsStatus || current.engine_fluids_status,
+    req.body.electricalsStatus || current.electricals_status,
+    req.body.toolkitProvided ? 1 : 0,
+    Number(req.body.keysProvided ?? current.keys_provided),
+    req.body.status || current.status,
+    req.body.notes || current.notes,
+    req.params.id
+  );
+  recordAudit(db, req.user, 'UPDATE', 'PDI', `Updated PDI inspection ${current.pdi_number}`, req.params.id);
+  const updated = db.prepare('SELECT * FROM pdi_records WHERE id = ?').get(req.params.id);
+  res.json({
+    id: updated.id,
+    pdiNo: updated.pdi_number,
+    saleId: updated.sale_id,
+    invoiceNo: updated.invoice_no,
+    vehicleName: updated.vehicle_name,
+    vin: updated.vin,
+    customerName: updated.customer_name,
+    inspectorName: updated.inspector_name,
+    inspectionDate: updated.inspection_date,
+    exteriorStatus: updated.exterior_status,
+    interiorStatus: updated.interior_status,
+    engineFluidsStatus: updated.engine_fluids_status,
+    electricalsStatus: updated.electricals_status,
+    toolkitProvided: Boolean(updated.toolkit_provided),
+    keysProvided: Number(updated.keys_provided),
+    status: updated.status,
+    notes: updated.notes,
+    createdAt: updated.created_at,
+    updatedAt: updated.updated_at
+  });
+});
+
+router.delete('/pdi/:id', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const current = db.prepare('SELECT * FROM pdi_records WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'PDI record not found' });
+  db.prepare('DELETE FROM pdi_records WHERE id = ?').run(req.params.id);
+  recordAudit(db, req.user, 'DELETE', 'PDI', `Deleted PDI inspection ${current.pdi_number}`, req.params.id);
+  res.json({ success: true });
+});
+
+router.get('/tradeins', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const tradeins = db.prepare('SELECT * FROM trade_ins ORDER BY created_at DESC').all();
+  res.json(tradeins.map(row => ({
+    id: row.id,
+    exchangeNo: row.exchange_number,
+    customerName: row.customer_name,
+    customerPhone: row.customer_phone,
+    oldBrand: row.old_brand,
+    oldModel: row.old_model,
+    oldYear: Number(row.old_year),
+    registrationNo: row.registration_no,
+    odometerKm: Number(row.odometer_km),
+    conditionRating: row.condition_rating,
+    estimatedValuation: Number(row.estimated_valuation),
+    approvedAdjustmentAmount: Number(row.approved_adjustment_amount),
+    adjustedAgainstSaleId: row.adjusted_against_sale_id,
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  })));
+});
+
+router.post('/tradeins', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const id = req.body.id || `exch_${Date.now()}`;
+  const totalCount = db.prepare('SELECT count(*) as c FROM trade_ins').get().c + 1;
+  const exchangeNo = req.body.exchangeNo || `EX-2026-${String(totalCount).padStart(3, '0')}`;
+
+  db.prepare(`
+    INSERT INTO trade_ins (
+      id, exchange_number, customer_name, customer_phone, old_brand, old_model,
+      old_year, registration_no, odometer_km, condition_rating, estimated_valuation,
+      approved_adjustment_amount, adjusted_against_sale_id, status, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    id, exchangeNo, req.body.customerName || 'Customer', req.body.customerPhone || '',
+    req.body.oldBrand || 'Brand', req.body.oldModel || 'Model',
+    Number(req.body.oldYear || 2019), req.body.registrationNo || 'UNKNOWN',
+    Number(req.body.odometerKm || 0), req.body.conditionRating || 'Good',
+    Number(req.body.estimatedValuation || 0), Number(req.body.approvedAdjustmentAmount || 0),
+    req.body.adjustedAgainstSaleId || null, req.body.status || 'Evaluated', req.body.notes || ''
+  );
+  recordAudit(db, req.user, 'CREATE', 'TRADEIN', `Created Trade-In ${exchangeNo}`, id);
+  const created = db.prepare('SELECT * FROM trade_ins WHERE id = ?').get(id);
+  res.status(201).json({
+    id: created.id,
+    exchangeNo: created.exchange_number,
+    customerName: created.customer_name,
+    customerPhone: created.customer_phone,
+    oldBrand: created.old_brand,
+    oldModel: created.old_model,
+    oldYear: Number(created.old_year),
+    registrationNo: created.registration_no,
+    odometerKm: Number(created.odometer_km),
+    conditionRating: created.condition_rating,
+    estimatedValuation: Number(created.estimated_valuation),
+    approvedAdjustmentAmount: Number(created.approved_adjustment_amount),
+    adjustedAgainstSaleId: created.adjusted_against_sale_id,
+    status: created.status,
+    notes: created.notes,
+    createdAt: created.created_at,
+    updatedAt: created.updated_at
+  });
+});
+
+router.put('/tradeins/:id', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const current = db.prepare('SELECT * FROM trade_ins WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'Trade-in record not found' });
+
+  db.prepare(`
+    UPDATE trade_ins SET
+      condition_rating = ?, estimated_valuation = ?, approved_adjustment_amount = ?,
+      adjusted_against_sale_id = ?, status = ?, notes = ?, updated_at = datetime('now')
+    WHERE id = ?
+  `).run(
+    req.body.conditionRating || current.condition_rating,
+    Number(req.body.estimatedValuation ?? current.estimated_valuation),
+    Number(req.body.approvedAdjustmentAmount ?? current.approved_adjustment_amount),
+    req.body.adjustedAgainstSaleId !== undefined ? req.body.adjustedAgainstSaleId : current.adjusted_against_sale_id,
+    req.body.status || current.status,
+    req.body.notes || current.notes,
+    req.params.id
+  );
+  recordAudit(db, req.user, 'UPDATE', 'TRADEIN', `Updated Trade-In ${current.exchange_number}`, req.params.id);
+  const updated = db.prepare('SELECT * FROM trade_ins WHERE id = ?').get(req.params.id);
+  res.json({
+    id: updated.id,
+    exchangeNo: updated.exchange_number,
+    customerName: updated.customer_name,
+    customerPhone: updated.customer_phone,
+    oldBrand: updated.old_brand,
+    oldModel: updated.old_model,
+    oldYear: Number(updated.old_year),
+    registrationNo: updated.registration_no,
+    odometerKm: Number(updated.odometer_km),
+    conditionRating: updated.condition_rating,
+    estimatedValuation: Number(updated.estimated_valuation),
+    approvedAdjustmentAmount: Number(updated.approved_adjustment_amount),
+    adjustedAgainstSaleId: updated.adjusted_against_sale_id,
+    status: updated.status,
+    notes: updated.notes,
+    createdAt: updated.created_at,
+    updatedAt: updated.updated_at
+  });
+});
+
+router.delete('/tradeins/:id', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {
+  const current = db.prepare('SELECT * FROM trade_ins WHERE id = ?').get(req.params.id);
+  if (!current) return res.status(404).json({ error: 'Trade-in record not found' });
+  db.prepare('DELETE FROM trade_ins WHERE id = ?').run(req.params.id);
+  recordAudit(db, req.user, 'DELETE', 'TRADEIN', `Deleted Trade-In ${current.exchange_number}`, req.params.id);
+  res.json({ success: true });
 });
 
 router.get('/warranties', authenticateToken, requireRole('ADMIN', 'SALES_EXECUTIVE'), (req, res) => {

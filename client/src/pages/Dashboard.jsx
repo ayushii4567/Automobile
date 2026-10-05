@@ -188,7 +188,8 @@ export default function Dashboard({
           <div style={{ flex: 1 }}>
             <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#92400e' }}>Showroom Low Stock Notice: </span>
             <span style={{ fontSize: '0.85rem', color: '#78350f' }}>
-              {lowStock.map(v => `${v.brand} ${v.model}`).join(', ')} — only 1 unit remaining on showroom floor.
+              {lowStock.slice(0, 3).map(v => `${v.brand} ${v.model} (${v.stock} left)`).join(', ')}
+              {lowStock.length > 3 && ` and ${lowStock.length - 3} more`} — low stock on showroom floor.
             </span>
           </div>
           <button onClick={() => onNavigate('inventory')} className="btn btn-secondary btn-sm">
@@ -368,7 +369,7 @@ export default function Dashboard({
             {/* Category breakdown tags */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
               {categoryBreakdown.map(cat => (
-                <span key={cat.category} style={{
+                <span key={cat.name} style={{
                   fontSize: '0.74rem',
                   padding: '4px 9px',
                   background: '#f1f5f9',
@@ -376,7 +377,7 @@ export default function Dashboard({
                   color: '#334155',
                   fontWeight: 600
                 }}>
-                  {cat.category}: <strong>{cat.count}</strong>
+                  {cat.name}: <strong>{cat.value}</strong>
                 </span>
               ))}
             </div>

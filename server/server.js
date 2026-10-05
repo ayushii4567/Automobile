@@ -1,6 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
+// Initialize database and apply schema extensions before loading routes
+require('./db/database');
+
 const apiRouter = require('./routes/api');
 
 const app = express();

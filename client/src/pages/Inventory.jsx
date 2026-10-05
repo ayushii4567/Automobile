@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function Inventory({ 
+  currentUser,
   vehicles = [], 
   onAddVehicle, 
   onEditVehicle, 
@@ -355,13 +356,15 @@ export default function Inventory({
                     >
                       <Edit2 size={13} />
                     </button>
-                    <button 
-                      onClick={() => onDeleteVehicle(vehicle.id)} 
-                      className="btn btn-danger btn-icon"
-                      title="Delete"
-                    >
-                      <Trash2 size={13} />
-                    </button>
+                    {currentUser?.role === 'ADMIN' && (
+                      <button 
+                        onClick={() => onDeleteVehicle(vehicle.id)} 
+                        className="btn btn-danger btn-icon"
+                        title="Delete"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '6px' }}>
@@ -447,9 +450,11 @@ export default function Inventory({
                         <button onClick={() => onEditVehicle(vehicle)} className="btn btn-secondary btn-icon" style={{ width: '28px', height: '28px' }}>
                           <Edit2 size={12} />
                         </button>
-                        <button onClick={() => onDeleteVehicle(vehicle.id)} className="btn btn-danger btn-icon" style={{ width: '28px', height: '28px' }}>
-                          <Trash2 size={12} />
-                        </button>
+                        {currentUser?.role === 'ADMIN' && (
+                          <button onClick={() => onDeleteVehicle(vehicle.id)} className="btn btn-danger btn-icon" style={{ width: '28px', height: '28px' }}>
+                            <Trash2 size={12} />
+                          </button>
+                        )}
                         {vehicle.status !== 'Sold' && (
                           <button onClick={() => onSellVehicle(vehicle)} className="btn btn-primary btn-sm" style={{ padding: '3px 8px' }}>
                             Sell

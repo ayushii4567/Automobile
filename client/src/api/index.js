@@ -73,9 +73,11 @@ async function request(endpoint, options = {}, fallbackAction) {
     }
 
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `HTTP error ${res.status}`);
+    const customErr = new Error(err.error || `HTTP error ${res.status}`);
+    customErr.isHttpError = true;
+    throw customErr;
   } catch (e) {
-    if (e.message && (e.message.includes('Access denied') || e.message.includes('Unauthorized') || e.message.includes('Authentication'))) {
+    if (e.isHttpError || (e.message && (e.message.includes('Access denied') || e.message.includes('Unauthorized') || e.message.includes('Authentication')))) {
       throw e;
     }
     // Falls back to local store only if network unreachable

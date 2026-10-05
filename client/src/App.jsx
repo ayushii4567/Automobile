@@ -332,8 +332,8 @@ export default function App() {
       setVehicles(prev => prev.filter(v => v.id !== id));
       showToast('Vehicle removed from inventory.');
       loadAllData();
-    } catch {
-      showToast('Failed to delete vehicle.', 'error');
+    } catch (err) {
+      showToast(err.message || 'Failed to delete vehicle.', 'error');
     }
   };
 
@@ -1188,6 +1188,7 @@ export default function App() {
               {/* 2. Vehicles Inventory */}
               {activeTab === 'inventory' && (
                 <Inventory 
+                  currentUser={currentUser}
                   vehicles={vehicles}
                   onAddVehicle={() => { setEditingVehicle(null); setIsVehicleModalOpen(true); }}
                   onEditVehicle={(v) => { setEditingVehicle(v); setIsVehicleModalOpen(true); }}

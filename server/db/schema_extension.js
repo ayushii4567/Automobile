@@ -45,6 +45,54 @@ function applySchemaExtensions() {
       CREATE INDEX IF NOT EXISTS idx_insurance_policies_cust ON insurance_policies(customer_id);
     `);
 
+    // Ensure pdi_records table exists
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS pdi_records (
+        id TEXT PRIMARY KEY,
+        pdi_number TEXT UNIQUE NOT NULL,
+        sale_id TEXT REFERENCES sales(id) ON DELETE SET NULL,
+        invoice_no TEXT,
+        vehicle_name TEXT NOT NULL,
+        vin TEXT,
+        customer_name TEXT NOT NULL,
+        inspector_name TEXT NOT NULL,
+        inspection_date TEXT NOT NULL,
+        exterior_status TEXT DEFAULT 'Passed',
+        interior_status TEXT DEFAULT 'Passed',
+        engine_fluids_status TEXT DEFAULT 'Passed',
+        electricals_status TEXT DEFAULT 'Passed',
+        toolkit_provided INTEGER DEFAULT 1,
+        keys_provided INTEGER DEFAULT 2,
+        status TEXT DEFAULT 'Passed',
+        notes TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+
+    // Ensure trade_ins table exists
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS trade_ins (
+        id TEXT PRIMARY KEY,
+        exchange_number TEXT UNIQUE NOT NULL,
+        customer_name TEXT NOT NULL,
+        customer_phone TEXT,
+        old_brand TEXT NOT NULL,
+        old_model TEXT NOT NULL,
+        old_year INTEGER NOT NULL DEFAULT 2019,
+        registration_no TEXT NOT NULL,
+        odometer_km INTEGER NOT NULL DEFAULT 0,
+        condition_rating TEXT NOT NULL DEFAULT 'Good',
+        estimated_valuation REAL NOT NULL DEFAULT 0,
+        approved_adjustment_amount REAL NOT NULL DEFAULT 0,
+        adjusted_against_sale_id TEXT REFERENCES sales(id) ON DELETE SET NULL,
+        status TEXT NOT NULL DEFAULT 'Evaluated',
+        notes TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+
     // 3. Ensure communications status column exists if not present
     const commCols = db.prepare('PRAGMA table_info(communications)').all().map(c => c.name);
     if (!commCols.includes('status')) {

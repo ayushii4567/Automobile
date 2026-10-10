@@ -49,6 +49,11 @@ export default function Header({
   }, []);
 
   const tabTitles = {
+    sales_management: { title: 'Sales Management', sub: 'Enquiries, Quotations, Challans, Tax Invoices, Agreements & Implements' },
+    service_management: { title: 'Service Management', sub: 'Job Cards, Estimates, Spare Invoices, Service History & Spares Ledger' },
+    exchange_management: { title: 'Exchange Management', sub: 'Exchange Purchase, Exchange Sales, Used Stock & Profit Tracking' },
+    accounts_management: { title: 'Accounts Management', sub: 'Payment/Receipt Vouchers, Ledgers, Cash/Bank Books & Financial Summaries' },
+    reports_management: { title: 'Reports Management', sub: 'Comprehensive Dealership Audits, Ledgers, GST & 31 Specialized Reports' },
     dashboard: { title: 'Dashboard', sub: 'Overview of sales, inventory, and showroom activity' },
     inventory: { title: 'Car Inventory', sub: 'Manage cars, prices, stock, and specifications' },
     customers: { title: 'Customer Management', sub: 'Client profiles, contact details, and vehicle inquiries' },

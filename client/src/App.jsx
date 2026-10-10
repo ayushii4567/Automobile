@@ -1,40 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import Dashboard from './pages/Dashboard';
-import Inventory from './pages/Inventory';
-import Customers from './pages/Customers';
-import Sales from './pages/Sales';
-import TestDrives from './pages/TestDrives';
-import Service from './pages/Service';
-import Staff from './pages/Staff';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import Finance from './pages/Finance';
-import Enquiries from './pages/Enquiries';
-import Quotations from './pages/Quotations';
-import Estimates from './pages/Estimates';
-import Parts from './pages/Parts';
-import Procurement from './pages/Procurement';
-import Login from './pages/Login';
 
-// 9 New Modules
-import PDI from './pages/PDI';
-import TradeIns from './pages/TradeIns';
-import FinanceApps from './pages/FinanceApps';
-import Insurance from './pages/Insurance';
-import Warranties from './pages/Warranties';
-import Appointments from './pages/Appointments';
-import Vendors from './pages/Vendors';
-import Payments from './pages/Payments';
-import Feedback from './pages/Feedback';
-import AuditLogs from './pages/AuditLogs';
-import Payroll from './pages/Payroll';
-import Expenses from './pages/Expenses';
-import Communications from './pages/Communications';
-import Reminders from './pages/Reminders';
-import Documents from './pages/Documents';
+// The 5 Master Business Sections
+import SalesManagement from './pages/SalesManagement';
+import ServiceManagement from './pages/ServiceManagement';
+import ExchangeManagement from './pages/ExchangeManagement';
+import AccountsManagement from './pages/AccountsManagement';
+import ReportsManagement from './pages/ReportsManagement';
+
+// Supporting Dealership Infrastructure (Admin only)
+import Settings from './pages/Settings';
 import Backup from './pages/Backup';
+import Login from './pages/Login';
 
 import InvoiceModal from './components/InvoiceModal';
 import VehicleModal from './components/modals/VehicleModal';
@@ -53,7 +31,7 @@ import ProcurementModal from './components/modals/ProcurementModal';
 import ReceiptModal from './components/ReceiptModal';
 
 import { api } from './api';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Settings as SettingsIcon, DatabaseBackup } from 'lucide-react';
 
 export default function App() {
   // Authentication state (ADMIN or SALES_EXECUTIVE)
@@ -66,10 +44,13 @@ export default function App() {
     }
   });
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('sales_management');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
+  const [isSystemSettingsOpen, setIsSystemSettingsOpen] = useState(false);
+  const [settingsSubTab, setSettingsSubTab] = useState('settings');
+  const [activeSubTab, setActiveSubTab] = useState(null);
 
   // Existing Data states
   const [dashboardData, setDashboardData] = useState(null);
@@ -184,10 +165,8 @@ export default function App() {
     try {
       localStorage.setItem('apex_user', JSON.stringify(user));
     } catch {}
+    setActiveTab('sales_management');
     const role = (user.role || '').toUpperCase();
-    if (role !== 'ADMIN' && ['staff', 'settings', 'reports', 'parts', 'procurement', 'vendors', 'auditlogs', 'payroll', 'expenses'].includes(activeTab)) {
-      setActiveTab('dashboard');
-    }
     showToast(`Signed in as ${user.name} (${role === 'ADMIN' ? 'Administrator' : 'Sales Floor Executive'})`);
   };
 
@@ -200,7 +179,7 @@ export default function App() {
       localStorage.removeItem('apex_user');
       localStorage.removeItem('apex_token');
     } catch {}
-    setActiveTab('dashboard');
+    setActiveTab('sales_management');
     showToast('Logged out of dealership session.');
   };
 
@@ -1098,6 +1077,14 @@ export default function App() {
     return <Login onLogin={handleLogin} />;
   }
 
+  const handleSubTabChange = (secOrSub, maybeSub) => {
+    if (maybeSub) {
+      setActiveSubTab(maybeSub);
+    } else {
+      setActiveSubTab(secOrSub);
+    }
+  };
+
   return (
     <div className="app-shell">
       {/* Toast Notification */}
@@ -1108,13 +1095,22 @@ export default function App() {
         </div>
       )}
 
-      {/* Sidebar with 23 Modules & Strict RBAC */}
+      {/* Sidebar with 5 Core Business Sections & Collapsible Submenus */}
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setActiveSubTab(null);
+        }}
+        activeSubTab={activeSubTab}
+        onSelectSubTab={(secId, subId) => {
+          setActiveTab(secId);
+          setActiveSubTab(subId);
+        }}
         counts={counts}
         currentUser={currentUser}
         onLogout={handleLogout}
+        onOpenSettings={() => setIsSystemSettingsOpen(true)}
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
       />
@@ -1122,7 +1118,10 @@ export default function App() {
       <div className="app-main-wrapper">
         <Header 
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={(tab) => {
+            setActiveTab(tab);
+            setActiveSubTab(null);
+          }}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           currentUser={currentUser}
@@ -1142,400 +1141,68 @@ export default function App() {
             </div>
           ) : (
             <>
-              {/* 1. Dashboard */}
-              {activeTab === 'dashboard' && (
-                <Dashboard 
-                  dashboardData={dashboardData}
+              {/* SECTION 1: Sales Management */}
+              {(activeTab === 'sales_management' || ['dashboard', 'inventory', 'customers', 'sales', 'enquiries', 'quotations', 'estimates', 'testdrives', 'pdi', 'documents'].includes(activeTab)) && (
+                <SalesManagement 
+                  currentUser={currentUser}
+                  subTab={activeTab === 'sales_management' ? activeSubTab : null}
+                  onSubTabChange={handleSubTabChange}
                   vehicles={vehicles}
-                  sales={sales}
-                  services={services}
-                  testdrives={testdrives}
-                  onNavigate={setActiveTab}
-                  onViewInvoice={(sale) => { setSelectedInvoiceSale(sale); setIsInvoiceOpen(true); }}
-                  onOpenAddSale={() => { setPreselectedVehicleForSale(null); setIsSaleModalOpen(true); }}
-                  onOpenAddVehicle={() => { setEditingVehicle(null); setIsVehicleModalOpen(true); }}
-                  onOpenAddQuotation={() => { setEditingQuotation(null); setIsQuotationModalOpen(true); }}
-                  onOpenAddTestDrive={() => { setTestDriveInitialData(null); setIsTestDriveModalOpen(true); }}
-                  onOpenAddService={() => setIsServiceModalOpen(true)}
-                />
-              )}
-
-              {/* Reminders & Action Alerts */}
-              {activeTab === 'reminders' && (
-                <Reminders 
-                  currentUser={currentUser}
-                  onNavigate={setActiveTab}
-                />
-              )}
-
-              {/* Communication, Campaigns & Client Outreach */}
-              {(activeTab === 'communications' || activeTab === 'campaigns') && (
-                <Communications 
-                  currentUser={currentUser}
                   customers={customers}
                   sales={sales}
-                />
-              )}
-
-              {/* Documents Management */}
-              {activeTab === 'documents' && (
-                <Documents 
-                  customers={customers}
-                  vehicles={vehicles}
-                  sales={sales}
-                />
-              )}
-
-              {/* 2. Vehicles Inventory */}
-              {activeTab === 'inventory' && (
-                <Inventory 
-                  currentUser={currentUser}
-                  vehicles={vehicles}
-                  onAddVehicle={() => { setEditingVehicle(null); setIsVehicleModalOpen(true); }}
-                  onEditVehicle={(v) => { setEditingVehicle(v); setIsVehicleModalOpen(true); }}
-                  onDeleteVehicle={handleDeleteVehicle}
-                  onSellVehicle={(v) => { setPreselectedVehicleForSale(v); setIsSaleModalOpen(true); }}
-                  onBookTestDrive={(v) => { setTestDriveInitialData({ vehicleName: `${v.brand} ${v.model}`, vehicleId: v.id }); setIsTestDriveModalOpen(true); }}
-                />
-              )}
-
-              {/* 3. Customers / CRM */}
-              {activeTab === 'customers' && (
-                <Customers 
-                  customers={customers}
-                  onAddCustomer={() => { setEditingCustomer(null); setIsCustomerModalOpen(true); }}
-                  onEditCustomer={(c) => { setEditingCustomer(c); setIsCustomerModalOpen(true); }}
-                  onDeleteCustomer={handleDeleteCustomer}
-                  onBookTestDrive={(data) => { setTestDriveInitialData(data); setIsTestDriveModalOpen(true); }}
-                  onNewEstimate={(cust) => {
-                    setEstimateInitialData({
-                      customerId: cust.customerId || cust.id,
-                      customerName: cust.customerName || cust.name,
-                      customerPhone: cust.customerPhone || cust.phone,
-                      vehicleInterest: cust.vehicleInterest
-                    });
-                    setIsEstimateModalOpen(true);
-                  }}
-                />
-              )}
-
-              {/* 4. Enquiries & Leads */}
-              {activeTab === 'enquiries' && (
-                <Enquiries
                   enquiries={enquiries}
-                  searchQuery={searchQuery}
-                  onAddEnquiry={() => { setEditingEnquiry(null); setIsEnquiryModalOpen(true); }}
-                  onEditEnquiry={(e) => { setEditingEnquiry(e); setIsEnquiryModalOpen(true); }}
-                  onDeleteEnquiry={handleDeleteEnquiry}
-                  onConvertTestDrive={(enq) => {
-                    setTestDriveInitialData({
-                      customerName: enq.customerName,
-                      customerPhone: enq.phone,
-                      vehicleName: enq.vehicleInterest
-                    });
-                    setIsTestDriveModalOpen(true);
-                  }}
-                  onConvertCustomer={handleConvertLeadToCustomer}
-                />
-              )}
-
-              {/* 5. Vehicle Cost Estimates & Pricing */}
-              {activeTab === 'estimates' && (
-                <Estimates
-                  estimates={estimates}
-                  onAddEstimate={() => { setEditingEstimate(null); setEstimateInitialData(null); setIsEstimateModalOpen(true); }}
-                  onEditEstimate={(est) => { setEditingEstimate(est); setIsEstimateModalOpen(true); }}
-                  onDeleteEstimate={handleDeleteEstimate}
-                  onConvertToQuotation={handleConvertEstimateToQuotation}
-                  onViewEstimate={(est) => { setSelectedEstimateForView(est); setIsEstimateViewOpen(true); }}
-                />
-              )}
-
-              {/* 6. Quotations / Pro-Forma */}
-              {activeTab === 'quotations' && (
-                <Quotations
                   quotations={quotations}
-                  onAddQuotation={() => { setEditingQuotation(null); setIsQuotationModalOpen(true); }}
-                  onEditQuotation={(q) => { setEditingQuotation(q); setIsQuotationModalOpen(true); }}
-                  onDeleteQuotation={handleDeleteQuotation}
-                  onViewQuotation={(q) => { setSelectedQuotation(q); setIsQuotationViewOpen(true); }}
-                  onConvertToSale={handleConvertToSale}
-                  onApplyFinance={handleApplyFinanceFromQuotation}
-                />
-              )}
-
-              {/* 7. Sales & Invoices */}
-              {activeTab === 'sales' && (
-                <Sales 
-                  sales={sales}
-                  onAddSale={() => { setPreselectedVehicleForSale(null); setIsSaleModalOpen(true); }}
-                  onDeleteSale={handleDeleteSale}
+                  estimates={estimates}
+                  onOpenAddEnquiry={() => { setEditingEnquiry(null); setIsEnquiryModalOpen(true); }}
+                  onOpenAddQuotation={() => { setEditingQuotation(null); setIsQuotationModalOpen(true); }}
+                  onOpenAddSale={() => { setPreselectedVehicleForSale(null); setIsSaleModalOpen(true); }}
                   onViewInvoice={(sale) => { setSelectedInvoiceSale(sale); setIsInvoiceOpen(true); }}
                   onRecordPayment={handleTriggerPayment}
                 />
               )}
 
-              {/* 8. Test Drives */}
-              {activeTab === 'testdrives' && (
-                <TestDrives 
-                  testdrives={testdrives}
-                  onAddTestDrive={() => { setTestDriveInitialData(null); setIsTestDriveModalOpen(true); }}
-                  onUpdateStatus={handleUpdateTestDriveStatus}
-                  onDeleteTestDrive={handleDeleteTestDrive}
-                  onCreateEstimate={(td) => {
-                    setEstimateInitialData({
-                      customerName: td.customerName,
-                      customerPhone: td.customerPhone,
-                      vehicleName: td.vehicleName,
-                      vehicleId: td.vehicle_id || td.vehicleId
-                    });
-                    setIsEstimateModalOpen(true);
-                  }}
-                />
-              )}
-
-              {/* 9. PDI Handover (NEW) */}
-              {activeTab === 'pdi' && (
-                <PDI 
-                  pdiList={pdiList}
-                  sales={sales}
-                  onAddPDI={handleAddPDI}
-                  onUpdatePDI={handleUpdatePDI}
-                />
-              )}
-
-              {/* 10. Used Car Trade-Ins (NEW) */}
-              {activeTab === 'tradeins' && (
-                <TradeIns 
-                  tradeIns={tradeIns}
-                  sales={sales}
-                  onAddTradeIn={handleAddTradeIn}
-                  onUpdateTradeIn={handleUpdateTradeIn}
-                />
-              )}
-
-              {/* 11. EMI Calculator */}
-              {activeTab === 'finance' && (
-                <Finance 
-                  initialData={financeInitialData}
-                  onApplyLoan={handleApplyLoanFromCalculator}
-                />
-              )}
-
-              {/* 12. Bank Loan Files (NEW) */}
-              {activeTab === 'finance-apps' && (
-                <FinanceApps 
-                  financeApps={financeApps}
-                  customers={customers}
-                  vehicles={vehicles}
-                  onAddFinanceApp={handleAddFinanceApp}
-                  onUpdateFinanceApp={handleUpdateFinanceApp}
-                />
-              )}
-
-              {/* 12. Insurance Policies (NEW) */}
-              {activeTab === 'insurance' && (
-                <Insurance 
-                  insurance={insurance}
-                  vehicles={vehicles}
-                  customers={customers}
-                  onAddInsurance={handleAddInsurance}
-                  onUpdateInsurance={handleUpdateInsurance}
-                />
-              )}
-
-              {/* 13. Warranties (NEW) */}
-              {activeTab === 'warranties' && (
-                <Warranties 
-                  warranties={warranties}
-                  vehicles={vehicles}
-                  customers={customers}
-                  onAddWarranty={handleAddWarranty}
-                  onUpdateWarranty={handleUpdateWarranty}
-                />
-              )}
-
-              {/* 14. Payment Receipts (NEW) */}
-              {activeTab === 'payments' && (
-                <Payments 
-                  payments={payments}
-                  sales={sales}
-                  settings={settings}
-                  onAddPayment={handleAddPayment}
-                  onUpdatePayment={handleUpdatePayment}
-                  initialPaymentData={initialPaymentData}
-                  onClearInitialPaymentData={() => setInitialPaymentData(null)}
-                />
-              )}
-
-              {/* 15. Workshop & Job Cards (Admin Only) */}
-              {activeTab === 'service' && isAdmin && (
-                <Service 
+              {/* SECTION 2: Service Management */}
+              {(activeTab === 'service_management' || ['service', 'appointments', 'parts'].includes(activeTab)) && (
+                <ServiceManagement 
+                  currentUser={currentUser}
+                  subTab={activeTab === 'service_management' ? activeSubTab : null}
+                  onSubTabChange={handleSubTabChange}
                   services={services}
                   parts={parts}
                   customers={customers}
                   vehicles={vehicles}
                   onAddService={() => setIsServiceModalOpen(true)}
-                  onUpdateStatus={handleUpdateServiceStatus}
-                  onDeleteService={handleDeleteService}
-                  onAllocateParts={handleAllocateServiceParts}
                 />
               )}
 
-              {/* 16. Service Bay Appointments (NEW) */}
-              {activeTab === 'appointments' && (
-                <Appointments 
-                  appointments={appointments}
-                  onAddAppointment={handleAddAppointment}
-                  onUpdateAppointment={handleUpdateAppointment}
-                  onConvertToService={handleConvertToService}
-                />
-              )}
-
-              {/* 17. Spare Parts (Admin Only) */}
-              {activeTab === 'parts' && isAdmin && (
-                <Parts
-                  parts={parts}
-                  onAddPart={() => { setEditingPart(null); setIsPartModalOpen(true); }}
-                  onEditPart={(p) => { setEditingPart(p); setIsPartModalOpen(true); }}
-                  onDeletePart={handleDeletePart}
-                  onUpdateStock={handleUpdatePartStock}
-                />
-              )}
-
-              {/* 18. OEM Procurement (Admin Only) */}
-              {activeTab === 'procurement' && isAdmin && (
-                <Procurement
-                  procurement={procurement}
-                  onAddOrder={() => { setEditingProcurement(null); setIsProcurementModalOpen(true); }}
-                  onEditOrder={(o) => { setEditingProcurement(o); setIsProcurementModalOpen(true); }}
-                  onDeleteOrder={handleDeleteProcurement}
-                  onUpdateStatus={handleUpdateProcurementStatus}
-                  onAddToInventory={handleProcurementAddToInventory}
-                />
-              )}
-
-              {/* 19. Suppliers & Vendors (NEW - Admin Only) */}
-              {activeTab === 'vendors' && isAdmin && (
-                <Vendors 
-                  vendors={vendors}
-                  onAddVendor={handleAddVendor}
-                  onUpdateVendor={handleUpdateVendor}
-                />
-              )}
-
-              {/* 20. Staff Management (Admin Only) */}
-              {activeTab === 'staff' && isAdmin && (
-                <Staff 
-                  staff={staff}
-                  onAddStaff={() => { setEditingStaff(null); setIsStaffModalOpen(true); }}
-                  onEditStaff={(member) => { setEditingStaff(member); setIsStaffModalOpen(true); }}
-                  onDeleteStaff={handleDeleteStaff}
-                />
-              )}
-
-              {/* Staff Payroll Ledger (Admin Only) */}
-              {activeTab === 'payroll' && isAdmin && (
-                <Payroll 
-                  payroll={payroll}
-                  staff={staff}
-                  settings={settings}
-                  onAddPayroll={handleAddPayroll}
-                  onUpdatePayroll={handleUpdatePayroll}
-                  onDeletePayroll={handleDeletePayroll}
-                  onGenerateBatch={handleGenerateBatchPayroll}
-                />
-              )}
-
-              {/* Showroom Operational Expenses (Admin Only) */}
-              {activeTab === 'expenses' && isAdmin && (
-                <Expenses 
-                  expenses={expenses}
-                  onAddExpense={handleAddExpense}
-                  onUpdateExpense={handleUpdateExpense}
-                  onDeleteExpense={handleDeleteExpense}
-                  onNavigateToReports={() => setActiveTab('reports')}
-                />
-              )}
-
-              {/* 21. Customer Feedback & CSAT (NEW) */}
-              {activeTab === 'feedback' && (
-                <Feedback 
-                  feedback={feedback}
-                  onAddFeedback={handleAddFeedback}
-                  onUpdateFeedback={handleUpdateFeedback}
-                />
-              )}
-
-              {/* 22. Financial Reports & Accounts Suite */}
-              {activeTab === 'reports' && (
-                <Reports 
+              {/* SECTION 3: Exchange Management */}
+              {(activeTab === 'exchange_management' || activeTab === 'tradeins') && (
+                <ExchangeManagement 
                   currentUser={currentUser}
-                  dashboardData={dashboardData}
-                  sales={sales}
-                  vehicles={vehicles}
+                  subTab={activeTab === 'exchange_management' ? activeSubTab : null}
+                  onSubTabChange={handleSubTabChange}
+                  onRecordPayment={handleTriggerPayment}
+                />
+              )}
+
+              {/* SECTION 4: Accounts Management */}
+              {(activeTab === 'accounts_management' || ['payments', 'expenses', 'payroll', 'finance', 'finance-apps', 'insurance', 'warranties', 'vendors', 'procurement'].includes(activeTab)) && (
+                <AccountsManagement 
+                  currentUser={currentUser}
+                  subTab={activeTab === 'accounts_management' ? activeSubTab : null}
+                  onSubTabChange={handleSubTabChange}
                   settings={settings}
                 />
               )}
 
-              {/* 23. Audit Trail Logs (NEW - Admin Only) */}
-              {activeTab === 'auditlogs' && isAdmin && (
-                <AuditLogs 
-                  auditLogs={auditLogs}
-                />
-              )}
-
-              {/* Backup & System Maintenance (Admin Only) */}
-              {activeTab === 'backup' && isAdmin && (
-                <Backup />
-              )}
-
-              {/* 24. Showroom Settings (Admin Only) */}
-              {activeTab === 'settings' && isAdmin && (
-                <Settings 
+              {/* SECTION 5: Reports Management */}
+              {(activeTab === 'reports_management' || ['reports', 'auditlogs'].includes(activeTab)) && (
+                <ReportsManagement 
+                  currentUser={currentUser}
+                  subTab={activeTab === 'reports_management' ? activeSubTab : null}
+                  onSubTabChange={handleSubTabChange}
                   settings={settings}
-                  onSaveSettings={handleSaveSettings}
                 />
-              )}
-
-              {/* Protected Route Guard: Access Denied for unauthorized roles */}
-              {!isAdmin && ['parts', 'procurement', 'vendors', 'staff', 'auditlogs', 'settings', 'payroll', 'expenses', 'service', 'backup'].includes(activeTab) && (
-                <div style={{
-                  background: '#131823',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '16px',
-                  padding: '48px 24px',
-                  textAlign: 'center',
-                  maxWidth: '540px',
-                  margin: '40px auto'
-                }}>
-                  <div style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 20px',
-                    color: '#ef4444'
-                  }}>
-                    <AlertCircle size={36} />
-                  </div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
-                    Access Denied
-                  </h2>
-                  <p style={{ color: '#94a3b8', fontSize: '0.95rem', marginBottom: '24px', lineHeight: 1.5 }}>
-                    This module is restricted to <strong>ADMIN</strong> authority. Your current role is <strong>SALES_EXECUTIVE</strong>.
-                  </p>
-                  <button 
-                    onClick={() => setActiveTab('dashboard')} 
-                    className="btn btn-primary"
-                    style={{ padding: '10px 24px', borderRadius: '8px' }}
-                  >
-                    Return to Dashboard
-                  </button>
-                </div>
               )}
             </>
           )}
@@ -1561,6 +1228,113 @@ export default function App() {
       </div>
 
       {/* ================= MODALS ================= */}
+      {/* Dealership System Configuration & DB Maintenance Modal */}
+      {isSystemSettingsOpen && isAdmin && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(5px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setIsSystemSettingsOpen(false)}
+        >
+          <div 
+            style={{
+              background: '#0f172a',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '920px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              padding: '24px'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '16px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                  <SettingsIcon size={20} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', margin: 0 }}>Dealership System Configuration</h3>
+                  <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '2px 0 0 0' }}>Dealership profile, taxation, business parameters & database backup</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsSystemSettingsOpen(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#94a3b8',
+                  borderRadius: '8px',
+                  width: '32px',
+                  height: '32px',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Sub-tabs inside modal */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setSettingsSubTab('settings')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: settingsSubTab === 'settings' ? '#3b82f6' : 'rgba(255, 255, 255, 0.06)',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+              >
+                Dealership Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettingsSubTab('backup')}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: settingsSubTab === 'backup' ? '#3b82f6' : 'rgba(255, 255, 255, 0.06)',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <DatabaseBackup size={14} /> Database Backup & Maintenance
+              </button>
+            </div>
+
+            {settingsSubTab === 'settings' ? (
+              <Settings settings={settings} onSaveSettings={handleSaveSettings} />
+            ) : (
+              <Backup />
+            )}
+          </div>
+        </div>
+      )}
       <InvoiceModal 
         isOpen={isInvoiceOpen}
         onClose={() => setIsInvoiceOpen(false)}

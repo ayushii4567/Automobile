@@ -818,5 +818,86 @@ export const api = {
   restoreBackup: (filename) => request(`/backup/restore/${encodeURIComponent(filename)}`, { method: 'POST' }, () => ({ success: true })),
   deleteBackup: (filename) => request(`/backup/${encodeURIComponent(filename)}`, { method: 'DELETE' }, () => ({ success: true })),
   getBackupDownloadUrl: (filename) => `${API_BASE}/backup/download/${encodeURIComponent(filename)}`,
-  getBackupExportJsonUrl: () => `${API_BASE}/backup/export-json`
+  getBackupExportJsonUrl: () => `${API_BASE}/backup/export-json`,
+
+  // =========================================================================
+  // 5 BUSINESS SECTIONS ENTERPRISE CLIENT APIS
+  // =========================================================================
+
+  // 1. Sales Management
+  getDeliveryChallans: () => request('/delivery-challans', {}, () => []),
+  createDeliveryChallan: (data) => request('/delivery-challans', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateDeliveryChallan: (id, data) => request(`/delivery-challans/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteDeliveryChallan: (id) => request(`/delivery-challans/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getAgreements: () => request('/agreements', {}, () => []),
+  createAgreement: (data) => request('/agreements', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateAgreement: (id, data) => request(`/agreements/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteAgreement: (id) => request(`/agreements/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getImplements: () => request('/implements', {}, () => []),
+  createImplement: (data) => request('/implements', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateImplement: (id, data) => request(`/implements/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteImplement: (id) => request(`/implements/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getImplementPurchases: () => request('/implements/purchases', {}, () => []),
+  createImplementPurchase: (data) => request('/implements/purchases', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteImplementPurchase: (id) => request(`/implements/purchases/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getImplementSales: () => request('/implements/sales', {}, () => []),
+  createImplementSale: (data) => request('/implements/sales', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteImplementSale: (id) => request(`/implements/sales/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  convertQuotationToSale: (data) => request('/sales/convert-quotation', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
+  getVehicleProfit: () => request('/sales/vehicle-profit', {}, () => ({ summary: {}, records: [] })),
+  getSalesDemographics: () => request('/sales/reports/demographics', {}, () => ({ salesmanWise: [], villageWise: [], tehsilWise: [], modelWise: [], hpWise: [] })),
+
+  // 2. Service Management
+  getJobEstimates: () => request('/services/job-estimates', {}, () => []),
+  createJobEstimate: (data) => request('/services/job-estimates', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateJobEstimate: (id, data) => request(`/services/job-estimates/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteJobEstimate: (id) => request(`/services/job-estimates/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  convertJobEstimateToJobCard: (id, data = {}) => request(`/services/job-estimates/${id}/convert-to-job-card`, { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
+  getServiceInvoices: () => request('/services/service-invoices', {}, () => []),
+  createServiceInvoice: (data) => request('/services/service-invoices', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteServiceInvoice: (id) => request(`/services/service-invoices/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  generateServiceInvoiceFromJobCard: (jobCardId) => request(`/job-cards/${jobCardId}/invoice`, { method: 'POST' }, () => ({ success: true })),
+  allocatePartsToJobCard: (jobCardId, data) => request(`/job-cards/${jobCardId}/allocate-parts`, { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
+  getSpareInvoices: () => request('/services/spare-invoices', {}, () => []),
+  createSpareInvoice: (data) => request('/services/spare-invoices', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteSpareInvoice: (id) => request(`/services/spare-invoices/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getPartsLedger: () => request('/parts/ledger', {}, () => []),
+  getSpareSales: () => request('/services/spare-sales', {}, () => ({ summary: {}, records: [] })),
+  getServiceReportsSummary: (params = '') => request(`/services/reports/summary${params ? '?' + params : ''}`, {}, () => ({ mechanicWise: [], dailyService: [] })),
+
+  // 3. Exchange Management
+  getExchangeStock: () => request('/tradeins/stock', {}, () => []),
+  createTradeIn: (data) => request('/tradeins', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateTradeIn: (id, data) => request(`/tradeins/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteTradeIn: (id) => request(`/tradeins/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  sellExchangeVehicle: (data) => request('/tradeins/resale', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true })),
+  getExchangeProfit: () => request('/tradeins/profit', {}, () => ({ summary: {}, records: [] })),
+  getExchangeReports: () => request('/tradeins/reports', {}, () => ({ modelWise: [], hpWise: [], salesmanWise: [], villageWise: [], tehsilWise: [], districtWise: [] })),
+
+  // 4. Accounts Management
+  getVouchers: (type) => request(`/accounts/vouchers${type ? '?type=' + type : ''}`, {}, () => []),
+  createVoucher: (data) => request('/accounts/vouchers', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  updateVoucher: (id, data) => request(`/accounts/vouchers/${id}`, { method: 'PUT', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteVoucher: (id) => request(`/accounts/vouchers/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getCashBook: (params = '') => request(`/accounts/cash-book${params ? '?' + params : ''}`, {}, () => ({ summary: { totalCashIn: 0, totalCashOut: 0, closingBalance: 0 }, cashReceipts: [], cashPayments: [] })),
+  getBankBook: (params = '') => request(`/accounts/bank-book${params ? '?' + params : ''}`, {}, () => ({ summary: { totalDebit: 0, totalCredit: 0, bankBalance: 0 }, records: [] })),
+  getEmployeeLedger: () => request('/accounts/employee-ledger', {}, () => []),
+  getPartyLedger: ({ partyType = 'customer', partyId } = {}) => request(`/accounts/party-ledger?partyType=${partyType}${partyId ? '&partyId=' + partyId : ''}`, {}, () => ({ party: null, partyList: [], transactions: [], summary: {} })),
+  getFinanceSummary: () => request('/accounts/finance-summary', {}, () => ({ records: [], bankWise: [] })),
+  getRtoSummary: () => request('/accounts/rto-summary', {}, () => ({ summary: {}, records: [] })),
+  getInsuranceSummary: () => request('/accounts/insurance-summary', {}, () => ({ records: [], providerWise: [] })),
+  getCustomerDue: () => request('/accounts/customer-due', {}, () => ({ summary: {}, records: [] })),
+  getMarginMoneyReceipts: () => request('/accounts/margin-money-receipts', {}, () => []),
+  getFinancePayouts: () => request('/accounts/finance-payouts', {}, () => []),
+  createFinancePayout: (data) => request('/accounts/finance-payouts', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteFinancePayout: (id) => request(`/accounts/finance-payouts/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+  getInsurancePayouts: () => request('/accounts/insurance-payouts', {}, () => []),
+  createInsurancePayout: (data) => request('/accounts/insurance-payouts', { method: 'POST', body: JSON.stringify(data) }, () => ({ success: true, ...data })),
+  deleteInsurancePayout: (id) => request(`/accounts/insurance-payouts/${id}`, { method: 'DELETE' }, () => ({ success: true })),
+
+  // 5. Master Reports Management
+  getDealershipMasterReports: (params = '') => request(`/reports/dealership-master${params ? '?' + params : ''}`, {}, () => ({
+    vehicleStock: [], implementStock: [], spareStock: [], accessoriesStock: [],
+    vehiclePurchases: [], sparePurchases: [], dayBook: []
+  }))
 };

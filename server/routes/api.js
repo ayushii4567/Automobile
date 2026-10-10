@@ -135,6 +135,9 @@ router.get('/health', (req, res) => {
   });
 });
 
+// Mount specialized dealership business sections routes (Sales, Service, Exchange, Accounts, Reports)
+router.use(require('./dealership_sections'));
+
 // ============================================================================
 // 3. DASHBOARD (Protected: ADMIN & SALES_EXECUTIVE)
 // ============================================================================
